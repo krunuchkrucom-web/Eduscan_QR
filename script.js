@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbypYMpS7OyHB-Q8vk7-35TVg0R06BPSDj650SIBnJKmmXlmN6a_8PFGBgGWe8ZP6cE/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwHV8K0Me5It_ePtkt4EhEnFPzypA6Rdpl-zmpU-vABr2fTeFYQGI8DZSppXSggnuPbtw/exec";
 let auth = JSON.parse(localStorage.getItem('auth')) || null;
 
 async function apiCall(data) {
