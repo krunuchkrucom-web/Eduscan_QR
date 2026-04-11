@@ -87,3 +87,58 @@ body {
     border-radius: 10px !important;
     background-color: #fdfdfd;
 }
+
+/* --- ส่วนเพิ่มเติมสำหรับ Layout ฝั่งครู (เหมือนภาพที่ 2) --- */
+.teacher-container {
+    height: 100vh;
+}
+
+#teacher-sidebar .nav-link {
+    transition: 0.2s;
+}
+
+#teacher-sidebar .nav-link:not(.active):hover {
+    background-color: #f8f9fa;
+    color: #0d6efd !important;
+}
+
+/* ทำให้ Sidebar ยุบได้เวลาจอเล็ก */
+@media (max-width: 768px) {
+    #teacher-sidebar {
+        margin-left: -250px;
+        position: fixed;
+        z-index: 1050;
+        transition: 0.3s;
+    }
+    #teacher-sidebar.toggled {
+        margin-left: 0;
+    }
+}
+
+/* ตกแต่ง Card ใน Dashboard ให้ดูสวยงาม (เหมือนภาพที่ 2) */
+.stat-card {
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.2s;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.bg-grad-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.bg-grad-success { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.bg-grad-warning { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+
+.class-btn {
+    transition: 0.2s;
+    opacity: 0.8;
+}
+.class-btn:hover, .class-btn.active {
+    transform: scale(1.05);
+    opacity: 1;
+    font-weight: bold;
+}
+
+.extra-small {
+    font-size: 0.8rem;
+}
