@@ -323,7 +323,20 @@ function openSubPage(title) {
 function closeSubPage() {
     document.getElementById('sub-page-container').style.display = 'none';
 }
+// ฟังก์ชันสำหรับเปิดหน้าย่อย
+function openSubPage(title) {
+    document.getElementById('menu-grid').style.display = 'none'; // ซ่อนเมนูหลัก
+    document.getElementById('sub-page-container').style.display = 'block'; // แสดงหน้าย่อย
+    document.getElementById('sub-page-title').innerText = title;
+    window.scrollTo(0,0);
+}
 
+// ฟังก์ชันสำหรับปิดหน้าย่อยกลับไปหน้าเมนู
+function closeSubPage() {
+    document.getElementById('menu-grid').style.display = 'block';
+    document.getElementById('sub-page-container').style.display = 'none';
+    document.getElementById('sub-page-content').innerHTML = ''; // ล้างขยะข้อมูลเดิม
+}
 
 function logout() { 
     localStorage.clear(); 
