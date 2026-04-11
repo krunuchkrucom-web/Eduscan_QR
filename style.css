@@ -1,7 +1,17 @@
-body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; }
-.login-card { border-top: 8px solid #0d6efd; }
-.loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index:9999; display: flex; justify-content: center; align-items: center; }
+body { 
+    font-family: 'Sarabun', sans-serif; 
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+    min-height: 100vh;
+    margin: 0;
+}
 
+.loader-overlay { 
+    position: fixed; top:0; left:0; width:100%; height:100%; 
+    background: rgba(0,0,0,0.7); z-index:9999; 
+    display: flex; justify-content: center; align-items: center; 
+}
+
+/* Card เมนูหน้าหลัก */
 .card-menu {
     border: none;
     border-radius: 20px;
@@ -11,29 +21,29 @@ body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; }
     transition: 0.3s;
     cursor: pointer;
     text-align: center;
+    font-weight: bold;
 }
 .card-menu:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+
+/* สีกราเดียนท์ */
 .bg-grad-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
 .bg-grad-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
 .bg-grad-orange { background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%); }
 .bg-grad-purple { background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%); }
 
-.nav-pill-custom { border-radius: 50px; padding: 10px 20px; font-weight: bold; }
-
-/* เพิ่มเติมจากของเดิม */
+/* Landing Page Cards */
 .role-card {
     transition: all 0.3s ease;
     cursor: pointer;
     border: 2px solid transparent !important;
 }
-
 .role-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
     border-color: #0d6efd !important;
 }
 
-.icon-circle {
+.icon-box {
     width: 100px;
     height: 100px;
     border-radius: 30px;
@@ -42,33 +52,12 @@ body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; }
     align-items: center;
 }
 
-.bg-student-light { background-color: #e7f3ff; }
-.bg-teacher-light { background-color: #f0f0f0; }
-
-.italic { font-style: italic; color: #0d6efd; }
-
-/* ทำให้หน้าดูสะอาดตาแบบ Minimal */
-body {
-    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-    min-height: 100vh;
-}
-
 .bg-info-light { background-color: #e3f2fd; }
 .bg-warning-light { background-color: #fff3e0; }
+.italic { font-style: italic; color: #0d6efd; }
 
-.icon-box {
-    width: 110px;
-    height: 110px;
-    border-radius: 35px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.login-card {
-    border-bottom: 5px solid #0d6efd;
-}
-
+/* Login Card */
+.login-card { border-bottom: 5px solid #0d6efd; }
 .form-control:focus {
     box-shadow: none;
     background-color: #e9ecef !important;
