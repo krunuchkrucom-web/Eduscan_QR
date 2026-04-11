@@ -103,31 +103,134 @@ function renderMenu() {
             </div>`;
     } else if (auth.role === 'Teacher') {
         area.innerHTML = `
-            <div class="row g-3 mb-4 text-white">
-                <div class="col-md-4"><div class="card stat-card bg-grad-blue p-4 shadow-sm border-0" onclick="showCreateQR()">📸 สแกนเข้าเรียน</div></div>
-                <div class="col-md-4"><div class="card stat-card bg-grad-green p-4 shadow-sm border-0">👥 เพิ่มนักเรียน</div></div>
-                <div class="col-md-4"><div class="card stat-card bg-grad-purple p-4 shadow-sm border-0" onclick="showHistory()">📊 ดูรายงาน</div></div>
-            </div>
-            <div class="card border-0 rounded-4 shadow-sm p-4">
-                <h5 class="fw-bold mb-3">เลือกห้องเรียน</h5>
-                <div class="d-flex gap-2 flex-wrap mb-4">
-                    <button class="btn btn-primary class-btn rounded-pill px-4" onclick="loadClassRoom('ปวช.1/1', this)">ปวช.1/1</button>
-                    <button class="btn btn-outline-primary class-btn rounded-pill px-4" onclick="loadClassRoom('ปวช.1/2', this)">ปวช.1/2</button>
-                    <button class="btn btn-outline-primary class-btn rounded-pill px-4" onclick="loadClassRoom('ปวส.2/1', this)">ปวส.2/1</button>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card-v2 bg-light-blue p-3 d-flex align-items-center" onclick="showCreateQR()">
+                        <div class="icon-box bg-primary text-white p-3 rounded-4 me-3">📸</div>
+                        <div><h6 class="mb-0 fw-bold">สแกนเข้าเรียน</h6><small>เริ่มสแกน QR Code</small></div>
+                    </div>
                 </div>
-                <h6 class="fw-bold text-muted mb-3">ห้อง: <span id="current-class-view" class="text-primary">ปวช.1/1</span></h6>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light"><tr><th>รหัส</th><th>ชื่อ</th><th>USERNAME</th><th>สถานะ</th></tr></thead>
-                        <tbody id="student-list-area"></tbody>
-                    </table>
+                <div class="col-md-4">
+                    <div class="stat-card-v2 bg-light-green p-3 d-flex align-items-center">
+                        <div class="icon-box bg-success text-white p-3 rounded-4 me-3">👤</div>
+                        <div><h6 class="mb-0 fw-bold">เพิ่มนักเรียน</h6><small>ลงทะเบียนนักเรียนใหม่</small></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card-v2 bg-light-purple p-3 d-flex align-items-center" onclick="showHistory()">
+                        <div class="icon-box bg-purple text-white p-3 rounded-4 me-3" style="background:#7c3aed;">📊</div>
+                        <div><h6 class="mb-0 fw-bold">ดูรายงาน</h6><small>สรุปข้อมูลการเข้าเรียน</small></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="summary-box mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">เลือกห้องเรียน</h5>
+                            <button class="btn btn-sm btn-outline-primary">+ เพิ่มห้องเรียน</button>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap mb-4">
+                            <button class="class-pill active p-3 bg-grad-blue" onclick="loadClassRoom('ปวช.1/1', this)">ปวช.1/1<br><small>32 คน</small></button>
+                            <button class="class-pill p-3 bg-grad-green" onclick="loadClassRoom('ปวช.1/2', this)">ปวช.1/2<br><small>28 คน</small></button>
+                            <button class="class-pill p-3" style="background:#f59e0b" onclick="loadClassRoom('ปวช.3/5', this)">ปวช.3/5<br><small>30 คน</small></button>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold">ห้องเรียน: <span id="current-class-view" class="text-primary">ปวช.1/1</span></h6>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-primary">📸 สแกนเข้าเรียน</button>
+                                <button class="btn btn-sm btn-success">+ เพิ่มนักเรียน</button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>รหัสนักเรียน</th>
+                                        <th>ชื่อ-นามสกุล</th>
+                                        <th>USERNAME</th>
+                                        <th>สถานะ</th>
+                                        <th>จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-list-area">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="summary-box">
+                                <h6 class="fw-bold mb-3">📸 สแกนเข้าเรียน</h6>
+                                <div class="bg-dark rounded-4 mb-3 d-flex align-items-center justify-content-center" style="height:200px;">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=S002" width="120">
+                                </div>
+                                <div class="text-center">
+                                    <p class="mb-1 fw-bold">นายสมศักดิ์ มีเกียรติ (S002)</p>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button class="btn btn-sm btn-success px-3">มา</button>
+                                        <button class="btn btn-sm btn-warning px-3">สาย</button>
+                                        <button class="btn btn-sm btn-danger px-3">ขาด</button>
+                                        <button class="btn btn-sm btn-primary px-3">ลา</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="summary-box">
+                                <h6 class="fw-bold mb-3">🎫 สร้าง QR Code</h6>
+                                <div class="row g-2 overflow-auto" style="max-height: 250px;">
+                                    <div class="col-6"><div class="qr-card"><img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=S001"><br><small>S001</small></div></div>
+                                    <div class="col-6"><div class="qr-card"><img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=S002"><br><small>S002</small></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="summary-box mb-4">
+                        <h6 class="fw-bold mb-3">สรุปภาพรวมวันนี้</h6>
+                        <div class="text-center mb-3">
+                            <div class="position-relative d-inline-block">
+                                <h2 class="position-absolute top-50 start-50 translate-middle fw-bold mb-0">158</h2>
+                                <canvas id="chart-summary" width="150" height="150"></canvas>
+                            </div>
+                        </div>
+                        <ul class="list-unstyled small">
+                            <li class="d-flex justify-content-between mb-2"><span><i class="status-dot dot-present"></i> มาเรียน</span> <b>132 (83.5%)</b></li>
+                            <li class="d-flex justify-content-between mb-2"><span><i class="status-dot dot-late"></i> สาย</span> <b>12 (7.6%)</b></li>
+                            <li class="d-flex justify-content-between mb-2"><span><i class="status-dot dot-absent"></i> ขาด</span> <b>8 (5.1%)</b></li>
+                            <li class="d-flex justify-content-between"><span><i class="status-dot dot-leave"></i> ลา</span> <b>6 (3.8%)</b></li>
+                        </ul>
+                    </div>
+
+                    <div class="summary-box">
+                        <h6 class="fw-bold mb-3">กิจกรรมล่าสุด</h6>
+                        <div class="small">
+                            <div class="d-flex mb-3">
+                                <div class="me-3 text-success">📸</div>
+                                <div><p class="mb-0 fw-bold">สแกนเข้าเรียน</p><small class="text-muted">นายสมศักดิ์ มีเกียรติ - 08:15</small></div>
+                            </div>
+                            <div class="d-flex mb-3">
+                                <div class="me-3 text-primary">👤</div>
+                                <div><p class="mb-0 fw-bold">เพิ่มนักเรียน</p><small class="text-muted">รหัส S033 - 10:30</small></div>
+                            </div>
+                            <button class="btn btn-light btn-sm w-100 rounded-pill">ดูทั้งหมด →</button>
+                        </div>
+                    </div>
                 </div>
             </div>`;
-        // โหลดข้อมูลห้องแรกเป็นค่าเริ่มต้น
-        const firstBtn = document.querySelector('.class-btn');
-        if(firstBtn) loadClassRoom('ปวช.1/1', firstBtn);
+        
+        // หลังจากโหลด HTML เสร็จ ให้ดึงข้อมูลนักเรียนห้องแรก
+        loadClassRoom('ปวช.1/1', document.querySelector('.class-pill'));
     }
 }
+
 
 // --- 4. ฟังก์ชันเสริมต่างๆ ---
 async function loadClassRoom(className, btnEl) {
