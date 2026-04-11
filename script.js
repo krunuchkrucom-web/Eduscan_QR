@@ -72,10 +72,103 @@ function initApp() {
 function renderMenu() {
     const area = document.getElementById('content-area');
     if (!area) return;
+
     if (auth.role === 'Student') {
-        area.innerHTML = `<h3>ยินดีต้อนรับนักเรียน: ${auth.name}</h3>`;
+        area.innerHTML = `
+            <div class="card border-0 rounded-4 shadow-sm mb-4 bg-primary text-white">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">สวัสดี, ${auth.name}</h5>
+                    <p class="small mb-0 opacity-75">รหัสนักเรียน: ${auth.user}</p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="card-menu bg-grad-blue" onclick="showAttendanceView()">
+                        <div class="fs-2 mb-2">📅</div>
+                        <div>เช็คชื่อเข้าเรียน</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card-menu bg-grad-green" onclick="showAssignmentView()">
+                        <div class="fs-2 mb-2">📝</div>
+                        <div>ใบงาน & ส่งงาน</div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card-menu bg-grad-purple" onclick="showReportView()">
+                        <div class="fs-2 mb-2">📊</div>
+                        <div>รายงานผลคะแนน & ประวัติ</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sub-page-container" class="mt-4" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 id="sub-page-title" class="fw-bold mb-0">รายละเอียด</h5>
+                    <button class="btn btn-sm btn-light rounded-pill" onclick="closeSubPage()">ปิด X</button>
+                </div>
+                <div id="sub-page-content" class="bg-white rounded-4 shadow-sm p-3"></div>
+            </div>`;
     } else {
-        area.innerHTML = `<h3>ยินดีต้อนรับคุณครู: ${auth.name}</h3>`;
+        if (auth.role === 'Teacher') {
+        area.innerHTML = `
+            <div class="card border-0 rounded-4 shadow-sm mb-4 bg-grad-orange text-white">
+                <div class="card-body p-4 text-center">
+                    <h5 class="mb-1">ยินดีต้อนรับคุณครู ${auth.name}</h5>
+                    <p class="small mb-0 opacity-75">จัดการระบบ EduTrack QR</p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-6 col-md-4">
+                    <div class="card-menu bg-white border shadow-sm" onclick="showTeacherAttendance()">
+                        <div class="fs-2 mb-2">📸</div>
+                        <div class="fw-bold text-dark">สแกนเช็คชื่อ</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="card-menu bg-white border shadow-sm" onclick="showSubjectManager()">
+                        <div class="fs-2 mb-2">📚</div>
+                        <div class="fw-bold text-dark">จัดการรายวิชา</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="card-menu bg-white border shadow-sm" onclick="showStudentManager()">
+                        <div class="fs-2 mb-2">👥</div>
+                        <div class="fw-bold text-dark">ข้อมูลนักเรียน</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-4">
+                    <div class="card-menu bg-white border shadow-sm" onclick="showAssignmentManager()">
+                        <div class="fs-2 mb-2">📝</div>
+                        <div class="fw-bold text-dark">ใบงาน/แบบทดสอบ</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="card-menu bg-white border shadow-sm" onclick="showScanWork()">
+                        <div class="fs-2 mb-2">🎯</div>
+                        <div class="fw-bold text-dark">สแกนตรวจงาน</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="card-menu bg-white border shadow-sm" onclick="showReportDashboard()">
+                        <div class="fs-2 mb-2">📈</div>
+                        <div class="fw-bold text-dark">สรุปผล & Export</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sub-page-container" class="mt-4" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded-3">
+                    <h5 id="sub-page-title" class="fw-bold mb-0 text-primary">หัวข้อการจัดการ</h5>
+                    <button class="btn btn-danger btn-sm rounded-pill px-3" onclick="closeSubPage()">ปิด</button>
+                </div>
+                <div id="sub-page-content" class="bg-white rounded-4 shadow-sm p-3 border"></div>
+            </div>`;
+    }
+}
     }
 }
 
