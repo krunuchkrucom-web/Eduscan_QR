@@ -70,27 +70,65 @@
             </div>
         </div>
         
-        <div id="main-view" style="display:none;">
-            <nav class="navbar shadow-sm mb-4 px-3 sticky-top bg-white">
-                <span class="navbar-brand fw-bold text-primary">EduTrack QR</span>
-                <div class="d-flex align-items-center">
-                    <span id="user-display-name" class="me-3 small fw-bold text-muted d-none d-sm-block"></span>
-                    <button onclick="logout()" class="btn btn-outline-danger btn-sm rounded-pill">ออกจากระบบ</button>
-                </div>
-            </nav>
-            <div class="container pb-5">
-                <div id="menu-grid">
-                    <div id="content-area"></div>
-                </div>
-
-                <div id="sub-page-container" class="sub-page">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <button class="btn btn-sm btn-light rounded-pill" onclick="closeSubPage()">← กลับหน้าหลัก</button>
-                        <h4 id="sub-page-title" class="fw-bold mb-0 text-primary text-end">ชื่อเมนู</h4>
+<div id="main-view" style="display:none; overflow-x: hidden;">
+            <div class="teacher-container d-flex">
+                <nav id="teacher-sidebar" class="bg-white p-3 shadow-sm border-end d-flex flex-column" style="min-width: 250px; min-height: 100vh;">
+                    <div class="logo-area d-flex align-items-center mb-4 pb-2 border-bottom">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2997/2997313.png" width="40" class="me-2">
+                        <h4 class="fw-bold text-primary mb-0">EduTrack QR</h4>
                     </div>
-                    <div id="sub-page-content">
+                    
+                    <ul class="nav nav-pills flex-column extra-small mb-auto">
+                        <li class="nav-item mb-2">
+                            <a href="#" class="nav-link active rounded-pill d-flex align-items-center" onclick="showDashboard(this)">
+                                <i class="me-2 text-primary fs-5">🏠</i> <span>จัดการชั้นเรียน</span>
+                            </div>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a href="#" class="nav-link text-muted rounded-pill d-flex align-items-center" onclick="showCreateQR(this)">
+                                <i class="me-2 fs-5">🖼️</i> <span>สร้าง QR Code</span>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a href="#" class="nav-link text-muted rounded-pill d-flex align-items-center" onclick="showHistory(this)">
+                                <i class="me-2 fs-5">📅</i> <span>สรุปมาเรียน</span>
+                            </a>
+                        </li>
+                        <li class="nav-item mb-2">
+                            <a href="#" class="nav-link text-muted rounded-pill d-flex align-items-center" onclick="showTeacherSetting(this)">
+                                <i class="me-2 fs-5">⚙️</i> <span>ตั้งค่า</span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="sidebar-footer border-top pt-3 text-center mt-3">
+                        <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill w-100 fw-bold shadow-sm extra-small">
+                            ออกจากระบบ
+                        </button>
+                    </div>
+                </nav>
+
+                <main id="teacher-content" class="bg-light w-100">
+                    <header class="navbar navbar-expand bg-white p-3 shadow-sm border-bottom sticky-top">
+                        <div class="container-fluid p-0">
+                            <button id="sidebarToggle" class="btn btn-sm btn-outline-secondary me-3 rounded-circle" onclick="toggleSidebar()">
+                                ☰
+                            </button>
+                            <span class="navbar-brand fw-bold text-primary italic ms-2">จัดการชั้นเรียน</span>
+                            
+                            <div class="ms-auto d-flex align-items-center">
+                                <div id="user-display-name" class="me-3 small fw-bold text-dark text-end">
+                                    <span class="d-block">ยินดีต้อนรับ</span>
+                                    <span class="text-muted extra-small">คุณครู admin</span>
+                                </div>
+                                <img id="teacher-avatar" src="https://cdn-icons-png.flaticon.com/512/921/921105.png" class="rounded-circle border" width="40" height="40" alt="Avatar">
+                            </div>
                         </div>
-                </div>
+                    </header>
+
+                    <div id="content-area" class="container-fluid p-4">
+                        </div>
+                </main>
             </div>
         </div>
     </div>
