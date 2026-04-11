@@ -92,29 +92,59 @@ function renderMenu() {
                 <div class="d-flex justify-content-between mb-2"><h5 id="sub-page-title"></h5><button class="btn btn-sm btn-light" onclick="closeSubPage()">ปิด X</button></div>
                 <div id="sub-page-content" class="p-3 bg-white rounded-4 border"></div>
             </div>`;
-    } else if (auth.role === 'Teacher') {
-        area.innerHTML = `
-            <div class="row g-3 mb-4 text-white text-center">
-                <div class="col-4"><div class="card stat-card bg-grad-blue shadow-sm p-3" onclick="showTeacherAttendance()">📸<br><small>สแกนชื่อ</small></div></div>
-                <div class="col-4"><div class="card stat-card bg-grad-green shadow-sm p-3" onclick="showStudentManager()">👥<br><small>นักเรียน</small></div></div>
-                <div class="col-4"><div class="card stat-card bg-grad-orange shadow-sm p-3" onclick="showSubjectManager()">📚<br><small>รายวิชา</small></div></div>
+    } } else if (auth.role === 'Teacher') {
+    area.innerHTML = `
+        <div class="row g-3 mb-4 text-white">
+            <div class="col-md-4">
+                <div class="card stat-card bg-grad-blue p-4 shadow-sm" onclick="showTeacherAttendance()">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><h5 class="mb-0">สแกนเข้าเรียน</h5><small>เริ่มสแกน QR Code</small></div>
+                        <div class="fs-1">📸</div>
+                    </div>
+                </div>
             </div>
-            <div class="card border-0 rounded-4 shadow-sm p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold mb-0">เลือกห้องเรียน</h6>
-                    <button class="btn btn-sm btn-primary rounded-pill px-3">วิทยาการคำนวณ</button>
+            <div class="col-md-4">
+                <div class="card stat-card bg-grad-green p-4 shadow-sm" onclick="showStudentManager()">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><h5 class="mb-0">เพิ่มนักเรียน</h5><small>ลงทะเบียนนักเรียนใหม่</small></div>
+                        <div class="fs-1">👥</div>
+                    </div>
                 </div>
-                <div class="row g-2 mb-3" id="class-list-area">
-                    <div class="col-4"><button class="btn btn-outline-primary btn-sm w-100">ปวช1/1</button></div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card bg-grad-purple p-4 shadow-sm" onclick="showHistory()">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><h5 class="mb-0">ดูรายงาน</h5><small>สรุปข้อมูลการเข้าเรียน</small></div>
+                        <div class="fs-1">📊</div>
+                    </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-sm small">
-                        <thead class="table-light"><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>สถานะ</th></tr></thead>
-                        <tbody id="student-list-area"><tr><td colspan="3" class="text-center">เลือกห้องเพื่อดูรายชื่อ</td></tr></tbody>
-                    </table>
-                </div>
-            </div>`;
-    }
+            </div>
+        </div>
+
+        <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+            <h5 class="fw-bold mb-3">เลือกห้องเรียน</h5>
+            <div class="d-flex gap-2 flex-wrap mb-4" id="class-list-area">
+                <button class="btn btn-primary class-btn rounded-3 px-4" onclick="loadClassRoom('ปวช.1/1', this)">ปวช.1/1</button>
+                <button class="btn btn-outline-primary class-btn rounded-3 px-4" onclick="loadClassRoom('ปวช.1/2', this)">ปวช.1/2</button>
+                <button class="btn btn-outline-primary class-btn rounded-3 px-4" onclick="loadClassRoom('ปวส.2/1', this)">ปวส.2/1</button>
+            </div>
+
+            <h6 class="fw-bold text-muted mb-3">ห้องเรียน: <span id="current-class-view" class="text-primary">ปวช.1/1</span></h6>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr><th>รหัสนักเรียน</th><th>ชื่อ-นามสกุล</th><th>USERNAME</th><th>สถานะ</th></tr>
+                    </thead>
+                    <tbody id="student-list-area">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    // โหลดข้อมูลเริ่มต้น
+    const firstBtn = document.querySelector('.class-btn');
+    if(firstBtn) loadClassRoom('ปวช.1/1', firstBtn);
+}
 }
 
 // --- 4. ฟังก์ชันจัดการ Sidebar และหน้าย่อย (Teacher Only) ---
@@ -152,6 +182,33 @@ function updateSidebarUI(el, title) {
         });
         el.classList.add('active', 'text-primary');
         el.classList.remove('text-muted');
+    }
+}
+
+// เพิ่มฟังก์ชันโหลดข้อมูลห้องเรียน
+async function loadClassRoom(className, btnEl) {
+    // ไฮไลท์ปุ่มที่เลือก
+    document.querySelectorAll('.class-btn').forEach(btn => btn.classList.replace('btn-primary', 'btn-outline-primary'));
+    btnEl.classList.replace('btn-outline-primary', 'btn-primary');
+    
+    document.getElementById('current-class-view').innerText = className;
+    const tableBody = document.getElementById('student-list-area');
+    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">กำลังโหลดข้อมูล...</td></tr>';
+
+    // ดึงข้อมูลจาก Google Sheets (เรียก Action: 'getStudentsByClass' ที่คุณครูต้องไปเขียนเพิ่มใน Apps Script)
+    const res = await apiCall({ action: 'getStudents', room: className });
+    
+    if (res.success && res.data) {
+        tableBody.innerHTML = res.data.map(std => `
+            <tr>
+                <td>${std.id}</td>
+                <td>${std.name}</td>
+                <td><span class="badge bg-light text-dark border">${std.user}</span></td>
+                <td><span class="${std.status === 'มาเรียน' ? 'text-success' : 'text-danger'}">● ${std.status}</span></td>
+            </tr>
+        `).join('');
+    } else {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">ไม่พบข้อมูลนักเรียนในห้องนี้</td></tr>';
     }
 }
 
