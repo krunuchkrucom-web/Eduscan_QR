@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwZJkpgBxv6bOBHGubmfvgA261GPamynMsjQjxTKWT-PV4M6NifU55Oh7wXIjfWtkvS_w/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbylt9pNy48G9ZIASdutlxX1d6yjWRmHEpvDNaxQJN-uj20J-SzcbyXarxTLaDgWId1IJw/exec";
 let currentRoom = "";
 
 window.onload = async () => {
