@@ -7,7 +7,38 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        .card-action { cursor: pointer; transition: 0.3s; }
+        .card-action:hover { transform: translateY(-5px); }
+        
+        /* ปรับปุ่มห้องเรียนให้เป็นหลอดสี (Pill Shape) */
+        .room-btn {
+            border-radius: 50px !important;
+            padding: 8px 20px !important;
+            font-size: 14px !important;
+            margin: 5px;
+            border: none;
+            transition: 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .room-btn:hover {
+            transform: scale(1.05);
+            filter: brightness(90%);
+        }
+        .room-btn.active {
+            ring: 2px solid #000;
+            font-weight: bold;
+        }
+
+        /* ปรับแต่งตาราง */
+        .table img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body class="bg-light">
     <div class="d-flex">
@@ -35,10 +66,10 @@
             <div class="p-4">
                 <div class="row g-4 mb-4">
                     <div class="col-md-6">
-                        <div class="card p-4 border-0 shadow-sm rounded-4 text-white card-action" style="background: linear-gradient(135deg, #10b981, #047857);" onclick="openStudentModal()">
+                        <div class="card p-4 border-0 shadow-sm rounded-4 text-white card-action" style="background: linear-gradient(135deg, #10b981, #047857);" onclick="openAddStudentModal()">
                             <div class="d-flex align-items-center">
                                 <div class="bg-white bg-opacity-25 p-3 rounded-circle me-3"><i class="fa-solid fa-user-plus fs-3"></i></div>
-                                <div><h5 class="mb-0 fw-bold">เพิ่มนักเรียน</h5><small>ลงทะเบียนนักเรียนใหม่ในห้องที่เลือก</small></div>
+                                <div><h5 class="mb-0 fw-bold">เพิ่มนักเรียน</h5><small>ลงทะเบียนนักเรียนใหม่</small></div>
                             </div>
                         </div>
                     </div>
@@ -54,8 +85,12 @@
 
                 <div class="row">
                     <div class="col-lg-12">
-                        <h6 class="fw-bold mb-3">เลือกห้องเรียน</h6>
-                        <div class="row g-3 mb-4" id="room-selection-area">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">เลือกห้องเรียน</h6>
+                            <div id="room-management-btns">
+                                </div>
+                        </div>
+                        <div class="d-flex flex-wrap mb-4" id="room-selection-area">
                             </div>
 
                         <div class="card border-0 shadow-sm rounded-4 p-4">
@@ -70,11 +105,12 @@
                                             <th>รหัส</th>
                                             <th>รูป</th>
                                             <th>ชื่อ-นามสกุล</th>
-                                            <th>สถานะ</th>
                                             <th>จัดการ</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="student-list-table"></tbody>
+                                    <tbody id="student-list-table">
+                                        <tr><td colspan="5" class="text-center text-muted">กรุณาเลือกห้องเรียนเพื่อดูรายชื่อ</td></tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -87,14 +123,32 @@
     <div class="modal fade" id="studentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4 shadow">
-                <div class="modal-header border-0"><h5 class="fw-bold">เพิ่มนักเรียนใหม่</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header border-0">
+                    <h5 class="fw-bold" id="modalTitle">เพิ่มนักเรียนใหม่</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="small">รหัสนักเรียน</label><input type="text" id="m-id" class="form-control rounded-pill"></div>
-                    <div class="mb-3"><label class="small">ชื่อ-นามสกุล</label><input type="text" id="m-name" class="form-control rounded-pill"></div>
-                    <div class="mb-3"><label class="small">URL รูปภาพนักเรียน</label><input type="text" id="m-photo" class="form-control rounded-pill" placeholder="https://..."></div>
+                    <form id="studentForm">
+                        <input type="hidden" id="editRowIndex">
+                        <div class="mb-3">
+                            <label class="small fw-bold">รหัสนักเรียน</label>
+                            <input type="text" id="studentId" class="form-control rounded-pill" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold">ชื่อ-นามสกุล</label>
+                            <input type="text" id="studentName" class="form-control rounded-pill" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold">รูปภาพนักเรียน</label>
+                            <input type="file" id="studentPhotoFile" class="form-control rounded-pill" accept="image/*" onchange="previewImage(this)">
+                            <div id="imagePreviewContainer" class="mt-3 text-center">
+                                <img id="imagePreview" src="" style="max-width: 120px; display: none; border-radius: 12px; border: 2px solid #eee;">
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer border-0">
-                    <button class="btn btn-primary w-100 rounded-pill" onclick="validateAndSaveStudent()">บันทึกข้อมูล</button>
+                    <button type="button" class="btn btn-primary w-100 rounded-pill py-2" onclick="submitStudentForm()">บันทึกข้อมูล</button>
                 </div>
             </div>
         </div>
@@ -105,25 +159,116 @@
             <div class="modal-content border-0 rounded-4 shadow">
                 <div class="modal-header border-0"><h5 class="fw-bold">จัดการห้องเรียน</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="small">ชื่อห้องเรียน (เช่น ปวช.1/1)</label><input type="text" id="input-room-name" class="form-control rounded-pill"></div>
                     <div class="mb-3">
-                        <label class="small">โทนสีของปุ่ม</label>
+                        <label class="small fw-bold">ชื่อห้องเรียน (เช่น ปวช.1/1)</label>
+                        <input type="text" id="input-room-name" class="form-control rounded-pill">
+                    </div>
+                    <div class="mb-3">
+                        <label class="small fw-bold">โทนสีของปุ่ม</label>
                         <select id="input-room-color" class="form-select rounded-pill">
                             <option value="btn-primary">สีน้ำเงิน</option>
                             <option value="btn-success">สีเขียว</option>
                             <option value="btn-warning">สีส้ม/เหลือง</option>
                             <option value="btn-danger">สีแดง</option>
                             <option value="btn-info">สีฟ้า</option>
+                            <option value="btn-dark">สีดำ</option>
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer border-0"><button class="btn btn-primary w-100 rounded-pill" onclick="saveRoomToSheet()">บันทึกห้องเรียน</button></div>
+                <div class="modal-footer border-0">
+                    <button class="btn btn-primary w-100 rounded-pill py-2" onclick="saveRoomToSheet()">บันทึกห้องเรียน</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="teacher.js"></script>
+    
+    <script>
+        let selectedFileBase64 = "";
+        let currentRoomId = "";
+
+        // ฟังก์ชันดูตัวอย่างรูปภาพและแปลงเป็น Base64
+        function previewImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'inline-block';
+                    selectedFileBase64 = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // เปิด Modal สำหรับเพิ่มใหม่
+        function openAddStudentModal() {
+            if(!currentRoomId) {
+                Swal.fire('กรุณาเลือกห้องเรียน', 'คุณต้องเลือกห้องเรียนก่อนทำการเพิ่มนักเรียน', 'warning');
+                return;
+            }
+            document.getElementById('modalTitle').innerText = "เพิ่มนักเรียนใหม่";
+            document.getElementById('studentForm').reset();
+            document.getElementById('editRowIndex').value = "";
+            document.getElementById('imagePreview').style.display = 'none';
+            selectedFileBase64 = "";
+            new bootstrap.Modal(document.getElementById('studentModal')).show();
+        }
+
+        // ฟังก์ชันส่งข้อมูลไปยัง Google Apps Script
+        function submitStudentForm() {
+            const id = document.getElementById('studentId').value;
+            const name = document.getElementById('studentName').value;
+            
+            if(!id || !name) {
+                Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกรหัสและชื่อนักเรียน', 'error');
+                return;
+            }
+
+            const studentData = {
+                id: id,
+                name: name,
+                photo: selectedFileBase64,
+                rowIndex: document.getElementById('editRowIndex').value,
+                room: currentRoomId
+            };
+
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+            google.script.run.withSuccessHandler(function(res) {
+                Swal.fire('สำเร็จ', res, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('studentModal')).hide();
+                loadStudentData(currentRoomId); // โหลดตารางใหม่
+            }).processStudentData(studentData);
+        }
+
+        // ฟังก์ชันแก้ไขข้อมูล (ดึงข้อมูลเดิมมาใส่ในฟอร์ม)
+        function editStudent(id, name, photoUrl, rowIndex) {
+            document.getElementById('modalTitle').innerText = "แก้ไขข้อมูลนักเรียน";
+            document.getElementById('studentId').value = id;
+            document.getElementById('studentName').value = name;
+            document.getElementById('editRowIndex').value = rowIndex;
+            if(photoUrl) {
+                document.getElementById('imagePreview').src = photoUrl;
+                document.getElementById('imagePreview').style.display = 'inline-block';
+            }
+            new bootstrap.Modal(document.getElementById('studentModal')).show();
+        }
+
+        // ฟังก์ชันจัดการห้องเรียน (ตัวอย่างการเรียกใช้)
+        function loadStudentData(roomId) {
+            currentRoomId = roomId;
+            document.getElementById('current-room-display').innerText = roomId;
+            // โค้ดสำหรับโหลดข้อมูลจาก GAS มาแสดงในตาราง student-list-table
+        }
+        
+        function logout() {
+            Swal.fire('ออกจากระบบ', 'กำลังกลับสู่หน้าหลัก', 'success').then(() => {
+                // window.location.href = 'index.html';
+            });
+        }
+    </script>
 </body>
 </html>
