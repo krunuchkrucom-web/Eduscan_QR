@@ -8,91 +8,36 @@
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body onload="checkAuth('Teacher')">
+<body>
     <div class="d-flex">
         <nav id="teacher-sidebar" class="bg-white p-3 shadow-sm border-end" style="width: 260px; min-height: 100vh;">
             <h6 class="fw-bold text-primary mb-4 border-bottom pb-3">EduTrack QR (ครู)</h6>
             <ul class="nav nav-pills flex-column">
-                <li class="nav-item"><a href="#" class="nav-link active">🏠 จัดการชั้นเรียน</a></li>
-                <li class="nav-item"><a href="#" class="nav-link text-dark" onclick="logout()">🚪 ออกจากระบบ</a></li>
+                <li class="nav-item mb-2">
+                    <a href="#" class="nav-link active" id="menu-dash" onclick="showDashboard()">🏠 จัดการชั้นเรียน</a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="#" class="nav-link text-dark" id="menu-qr" onclick="showCreateQR()">🖼️ สร้าง QR Code</a>
+                </li>
+                <li class="nav-item mt-4">
+                    <a href="#" class="nav-link text-danger" onclick="logout()">🚪 ออกจากระบบ</a>
+                </li>
             </ul>
         </nav>
 
-        <main class="flex-grow-1">
-            <header class="navbar bg-white p-3 shadow-sm">
-                <span class="fw-bold px-3">ยินดีต้อนรับคุณครู: <span id="teacher-name"></span></span>
+        <main class="flex-grow-1 bg-light">
+            <header class="navbar bg-white p-3 shadow-sm mb-4">
+                <span class="fw-bold px-3" id="header-title">ระบบจัดการชั้นเรียน</span>
+                <div class="ms-auto px-3 text-end" id="user-display-area">
+                    </div>
             </header>
+
             <div class="p-4" id="content-area">
-                <div class="row g-4">
-                    <div class="col-lg-8">
-                        <div class="card p-4 border-0 shadow-sm rounded-4">
-                            <h5>รายชื่อนักเรียน</h5>
-                            <div id="student-list"></div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="card p-4 border-0 shadow-sm rounded-4 text-center">
-                            <h6>สถิติวันนี้</h6>
-                            <h2 class="text-primary">158</h2>
-                        </div>
-                    </div>
                 </div>
-            </div>
         </main>
     </div>
 
-    <script>
-        // ฟังก์ชันตรวจสอบสิทธิ์ก่อนเข้าหน้า
-        function checkAuth(role) {
-            const auth = JSON.parse(localStorage.getItem('auth'));
-            if (!auth || auth.role !== role) {
-                window.location.href = 'index.html'; // ถ้าไม่มีสิทธิ์ให้เด้งกลับหน้าแรก
-            } else {
-                document.getElementById('teacher-name').innerText = auth.name;
-            }
-        }
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-
-    function showCreateQR() {
-    document.getElementById('header-title').innerText = "สร้าง QR Code รายบุคคล";
-    const area = document.getElementById('content-area');
-    
-    area.innerHTML = `
-        <div class="card border-0 shadow-sm rounded-4 p-4">
-            <div class="row">
-                <div class="col-md-5">
-                    <h5 class="fw-bold mb-3">กรอกข้อมูลเพื่อสร้าง QR</h5>
-                    <div class="mb-3">
-                        <label class="form-label small">รหัสนักเรียน (ID)</label>
-                        <input type="text" id="qr-input-id" class="form-control rounded-pill" placeholder="เช่น 69001">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small">ชื่อ-นามสกุล</label>
-                        <input type="text" id="qr-input-name" class="form-control rounded-pill" placeholder="นายสมชาย ใจดี">
-                    </div>
-                    <button onclick="generateQR()" class="btn btn-primary w-100 rounded-pill fw-bold">สร้าง QR Code</button>
-                </div>
-                <div class="col-md-7 text-center border-start">
-                    <div id="qr-result-area" class="p-3 d-none">
-                        <div id="qr-card-to-print" class="p-4 border rounded-4 bg-white shadow-sm d-inline-block" style="width: 250px;">
-                            <h6 class="fw-bold text-primary mb-2">EduTrack QR</h6>
-                            <div id="qr-image-container" class="mb-2"></div>
-                            <div class="fw-bold" id="qr-display-name"></div>
-                            <div class="small text-muted" id="qr-display-id"></div>
-                        </div>
-                        <div class="mt-3">
-                            <button onclick="printQR()" class="btn btn-outline-dark rounded-pill px-4">พิมพ์บัตร QR</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="teacher.js"></script>
 </body>
 </html>
