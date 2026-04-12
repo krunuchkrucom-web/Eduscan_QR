@@ -100,3 +100,57 @@ function logout() {
     localStorage.clear();
     window.location.href = 'index.html';
 }
+
+// ฟังก์ชันบันทึกนักเรียน (เพิ่มจากของเดิมที่คุณครูเขียนค้างไว้)
+async function validateAndSaveStudent() {
+    const id = document.getElementById('m-id').value;
+    const name = document.getElementById('m-name').value;
+    const photo = document.getElementById('m-photo').value;
+    
+    const namePattern = /^[ก-๙a-zA-Z\s]+$/;
+    if (!namePattern.test(name)) {
+        return Swal.fire('ข้อผิดพลาด', 'ชื่อ-นามสกุลต้องเป็นตัวอักษรเท่านั้น', 'error');
+    }
+
+    Swal.showLoading();
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'addStudent',
+            id: id,
+            name: name,
+            photo: photo,
+            room: currentRoom
+        })
+    });
+    const result = await response.json();
+    if (result.success) {
+        Swal.fire('สำเร็จ', 'เพิ่มนักเรียนเรียบร้อย', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('studentModal')).hide();
+        selectRoom(currentRoom); // โหลดตารางใหม่
+    }
+}
+
+// ฟังก์ชันบันทึกห้องเรียน
+async function saveRoomToSheet() {
+    const name = document.getElementById('input-room-name').value;
+    const color = document.getElementById('input-room-color').value;
+
+    if(!name) return Swal.fire('เตือน', 'กรุณาระบุชื่อห้อง', 'warning');
+
+    Swal.showLoading();
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'addRoom',
+            roomName: name,
+            roomColor: color
+        })
+    });
+    const result = await response.json();
+    if (result.success) {
+        Swal.fire('สำเร็จ', 'เพิ่มห้องเรียนเรียบร้อย', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('roomModal')).hide();
+        loadRooms(); // โหลดปุ่มใหม่
+    }
+}
