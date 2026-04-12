@@ -2,10 +2,9 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwHV8K0Me5It_ePtkt4EhEn
 let auth = JSON.parse(localStorage.getItem('auth')) || null;
 let currentSelectedRole = ""; 
 
-// --- 1. ฟังก์ชันเลือกบทบาท (แก้ไขจุดที่กดไม่ได้) ---
+// --- 1. ระบบจัดการหน้าจอ (Navigation) ---
 function selectRole(role) {
     currentSelectedRole = role;
-    // ซ่อนหน้าแรก และแสดงหน้า Login
     document.getElementById('role-view').style.setProperty('display', 'none', 'important');
     document.getElementById('login-view').style.setProperty('display', 'flex', 'important');
     
@@ -21,7 +20,7 @@ function backToRole() {
     document.getElementById('login-view').style.setProperty('display', 'none', 'important');
 }
 
-// --- 2. ระบบ API และ Login ---
+// --- 2. ระบบ Login ---
 async function handleLogin() {
     const user = document.getElementById('username').value;
     const pass = document.getElementById('password').value;
@@ -30,12 +29,14 @@ async function handleLogin() {
         return;
     }
     
-    // แสดง Loader
     document.getElementById('loader').style.display = 'flex';
     
     try {
-        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'login', user, pass }) });
-        const json = await res.json();
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: 'login', user, pass }) 
+        });
+        const json = await response.json();
         
         document.getElementById('loader').style.display = 'none';
         
@@ -46,6 +47,9 @@ async function handleLogin() {
             }
             auth = json;
             localStorage.setItem('auth', JSON.stringify(json));
+            // ล้างค่าในช่องกรอก
+            document.getElementById('username').value = "";
+            document.getElementById('password').value = "";
             initApp();
         } else {
             Swal.fire('ล้มเหลว', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
@@ -56,7 +60,7 @@ async function handleLogin() {
     }
 }
 
-// --- 3. เริ่มต้นแอปและ Render Dashboard ---
+// --- 3. เริ่มต้นแอป ---
 function initApp() {
     if (!auth) return;
     document.getElementById('role-view').style.display = 'none';
@@ -65,53 +69,91 @@ function initApp() {
 
     const userDisplay = document.getElementById('user-display-name');
     if (userDisplay) {
-        userDisplay.innerHTML = `<div class="fw-bold">${auth.name}</div><small class="text-muted">${auth.role}</small>`;
+        userDisplay.innerHTML = `<div class="fw-bold text-dark">${auth.name}</div><small class="text-muted">${auth.role}</small>`;
     }
-    renderMenu();
+    
+    // จัดการ Sidebar กรณีเป็นนักเรียน
+    if (auth.role === 'Student') {
+        document.getElementById('teacher-sidebar').style.display = 'none';
+    }
+
+    showDashboard(); // เริ่มต้นที่หน้า Dashboard
 }
 
-function renderMenu() {
+// --- 4. ฟังก์ชันแสดงเนื้อหาแต่ละหน้า ---
+function showDashboard(el) {
+    updateActiveLink(el);
     const area = document.getElementById('content-area');
+    document.getElementById('header-title').innerText = "จัดการชั้นเรียน";
+
     if (auth.role === 'Teacher') {
-        // โครงสร้างหน้าผู้สอนแบบในรูป (Dashboard 8:4)
         area.innerHTML = `
             <div class="row g-3 mb-4">
-                <div class="col-md-4"><div class="card p-3 border-0 shadow-sm bg-light-blue rounded-4" onclick="showCreateQR()">📸 <b>สแกนเข้าเรียน</b></div></div>
-                <div class="col-md-4"><div class="card p-3 border-0 shadow-sm bg-light-green rounded-4">👤 <b>เพิ่มนักเรียน</b></div></div>
-                <div class="col-md-4"><div class="card p-3 border-0 shadow-sm bg-light-purple rounded-4">📊 <b>ดูรายงาน</b></div></div>
+                <div class="col-md-4"><div class="stat-card-v2 bg-light-blue p-3 d-flex align-items-center shadow-sm" onclick="showCreateQR()">
+                    <div class="bg-primary text-white p-3 rounded-4 me-3">📸</div>
+                    <div><h6 class="mb-0 fw-bold">สแกนเข้าเรียน</h6></div>
+                </div></div>
+                <div class="col-md-4"><div class="stat-card-v2 bg-light-green p-3 d-flex align-items-center shadow-sm">
+                    <div class="bg-success text-white p-3 rounded-4 me-3">👤</div>
+                    <div><h6 class="mb-0 fw-bold">เพิ่มนักเรียน</h6></div>
+                </div></div>
+                <div class="col-md-4"><div class="stat-card-v2 bg-light-purple p-3 d-flex align-items-center shadow-sm" onclick="showHistory()">
+                    <div class="bg-warning text-white p-3 rounded-4 me-3">📊</div>
+                    <div><h6 class="mb-0 fw-bold">ดูรายงาน</h6></div>
+                </div></div>
             </div>
             <div class="row g-4">
                 <div class="col-lg-8">
-                    <div class="card p-4 border-0 shadow-sm rounded-4">
-                        <div class="d-flex justify-content-between mb-3"><h5>เลือกห้องเรียน</h5></div>
+                    <div class="card border-0 shadow-sm rounded-4 p-4">
+                        <h5 class="fw-bold mb-3">เลือกห้องเรียน</h5>
                         <div class="d-flex gap-2 mb-4">
-                            <button class="btn btn-primary rounded-3 px-4" onclick="loadClassRoom('ปวช.1/1')">ปวช.1/1</button>
-                            <button class="btn btn-outline-secondary rounded-3 px-4" onclick="loadClassRoom('ปวช.1/2')">ปวช.1/2</button>
+                            <button class="btn btn-primary rounded-pill px-4" onclick="loadClassRoom('ปวช.1/1')">ปวช.1/1</button>
+                            <button class="btn btn-outline-secondary rounded-pill px-4" onclick="loadClassRoom('ปวช.1/2')">ปวช.1/2</button>
                         </div>
-                        <table class="table align-middle">
-                            <thead class="table-light"><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
-                            <tbody id="student-list-area"></tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead class="table-light"><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+                                <tbody id="student-list-area"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-4">
-                    <div class="card p-4 border-0 shadow-sm rounded-4 text-center">
-                        <h6>สรุปภาพรวมวันนี้</h6>
-                        <h2 class="text-primary fw-bold">158</h2>
-                        <p class="small text-muted">คน</p>
+                    <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
+                        <h6 class="fw-bold mb-3">สรุปภาพรวมวันนี้</h6>
+                        <h2 class="text-primary fw-bold display-5">158</h2>
+                        <p class="text-muted">คนเข้าเรียนทั้งหมด</p>
                     </div>
                 </div>
             </div>`;
         loadClassRoom('ปวช.1/1');
     } else {
-        area.innerHTML = `<h4>ยินดีต้อนรับนักเรียน</h4>`;
+        area.innerHTML = `<div class="p-5 text-center"><h3>ยินดีต้อนรับนักเรียน: ${auth.name}</h3><p>ระบบกำลังเตรียมข้อมูลส่วนตัวของคุณ...</p></div>`;
     }
+}
+
+function showCreateQR(el) {
+    updateActiveLink(el);
+    document.getElementById('header-title').innerText = "สร้าง QR Code";
+    document.getElementById('content-area').innerHTML = `<div class="card p-5 border-0 shadow-sm rounded-4 text-center"><h4>ระบบสร้าง QR Code รายบุคคล</h4><p>ฟังก์ชันนี้กำลังถูกเรียกใช้งาน...</p></div>`;
+}
+
+function showHistory(el) {
+    updateActiveLink(el);
+    document.getElementById('header-title').innerText = "สรุปรายงานการเข้าเรียน";
+    document.getElementById('content-area').innerHTML = `<div class="card p-5 border-0 shadow-sm rounded-4 text-center"><h4>รายงานสรุปผล</h4><p>กำลังดึงข้อมูลจาก Google Sheets...</p></div>`;
+}
+
+function updateActiveLink(el) {
+    if (!el) return;
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    el.classList.add('active');
 }
 
 async function loadClassRoom(room) {
     const tbody = document.getElementById('student-list-area');
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center">กำลังโหลด...</td></tr>';
-    // ส่วนนี้จะดึงข้อมูลจริงจาก Google Sheets
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center">กำลังดึงข้อมูลนักเรียนห้อง ' + room + '...</td></tr>';
 }
 
 function logout() {
@@ -119,4 +161,9 @@ function logout() {
     location.reload();
 }
 
-window.onload = () => { if(auth) initApp(); };
+function toggleSidebar() {
+    document.getElementById('teacher-sidebar').classList.toggle('toggled');
+}
+
+// ตรวจสอบสถานะตอนโหลดหน้า
+window.onload = () => { if (auth) initApp(); };
