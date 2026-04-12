@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - EduTrack QR</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body onload="checkAuth('Teacher')">
+    <div class="d-flex">
+        <nav id="teacher-sidebar" class="bg-white p-3 shadow-sm border-end" style="width: 260px; min-height: 100vh;">
+            <h6 class="fw-bold text-primary mb-4 border-bottom pb-3">EduTrack QR (ครู)</h6>
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item"><a href="#" class="nav-link active">🏠 จัดการชั้นเรียน</a></li>
+                <li class="nav-item"><a href="#" class="nav-link text-dark" onclick="logout()">🚪 ออกจากระบบ</a></li>
+            </ul>
+        </nav>
+
+        <main class="flex-grow-1">
+            <header class="navbar bg-white p-3 shadow-sm">
+                <span class="fw-bold px-3">ยินดีต้อนรับคุณครู: <span id="teacher-name"></span></span>
+            </header>
+            <div class="p-4" id="content-area">
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="card p-4 border-0 shadow-sm rounded-4">
+                            <h5>รายชื่อนักเรียน</h5>
+                            <div id="student-list"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card p-4 border-0 shadow-sm rounded-4 text-center">
+                            <h6>สถิติวันนี้</h6>
+                            <h2 class="text-primary">158</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ฟังก์ชันตรวจสอบสิทธิ์ก่อนเข้าหน้า
+        function checkAuth(role) {
+            const auth = JSON.parse(localStorage.getItem('auth'));
+            if (!auth || auth.role !== role) {
+                window.location.href = 'index.html'; // ถ้าไม่มีสิทธิ์ให้เด้งกลับหน้าแรก
+            } else {
+                document.getElementById('teacher-name').innerText = auth.name;
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
