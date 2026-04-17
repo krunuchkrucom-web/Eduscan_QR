@@ -188,7 +188,7 @@
 <script>
     let selectedFileBase64 = "";
     let currentRoomId = "";
-    const API_URL = "https://script.google.com/macros/s/AKfycbwAq-VQsdBtPTwf-ojmCaymWGFTp177ZspoQ18UUOM-yrn6AGI5okR2i9CwYEX9lgN8Rg/exec"; // *** อย่าลืมเปลี่ยน URL ตรงนี้ ***
+    const API_URL = "https://script.google.com/macros/s/AKfycbwAq-VQsdBtPTwf-ojmCaymWGFTp177ZspoQ18UUOM-yrn6AGI5okR2i9CwYEX9lgN8Rg/exec; // *** อย่าลืมเปลี่ยน URL ตรงนี้ ***
 
     // === 1. โหลดข้อมูลเมื่อเปิดหน้าเว็บ ===
     window.onload = function() {
@@ -258,7 +258,7 @@
                 const row = `<tr>
                     <td>${std.num}</td>
                     <td><span class="badge bg-light text-dark border">${std.id}</span></td>
-                    <td><img src="${std.photo || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'"></td>
+                    <td><img src="${student.photo}" style="width:50px; height:50px; object-fit:cover; border-radius:5px;"></td>
                     <td>${std.name}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="editStudent('${std.id}', '${std.name}', '${std.photo}')">
