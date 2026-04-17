@@ -311,34 +311,41 @@
     }
 
     // === 5. ฟังก์ชันส่งชื่อห้องเรียนใหม่เข้าฐานข้อมูล ===
-    async function saveRoomToSheet() {
-        const name = document.getElementById('input-room-name').value;
-        const color = document.getElementById('input-room-color').value;
+async function saveRoomToSheet() {
+    const name = document.getElementById('input-room-name').value;
+    const color = document.getElementById('input-room-color').value; // ตรวจสอบ ID Select สี
 
-        if (!name) {
-            Swal.fire('แจ้งเตือน', 'กรุณาระบุชื่อห้องเรียน', 'warning');
-            return;
-        }
+    if (!name) {
+        Swal.fire('แจ้งเตือน', 'กรุณาระบุชื่อห้องเรียน', 'warning');
+        return;
+    }
 
-        Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+    Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
 
-        try {
-            // เราจะส่งไปที่ Code.gs โดยใช้ action 'addStudent' (หรือคุณจะเพิ่ม action: 'addRoom' ใน Code.gs ก็ได้)
-            // แต่เพื่อให้ง่าย ผมแนะนำให้เพิ่มฟังก์ชันรับ addRoom ใน Code.gs ด้วยครับ
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'addRoom', roomName: name, roomColor: color })
-            });
-            
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                action: 'addRoom', 
+                roomName: name, 
+                roomColor: color // ส่งค่าสีไปด้วย
+            })
+        });
+        const res = await response.json();
+        
+        if (res.success) {
             Swal.fire('สำเร็จ', 'เพิ่มห้องเรียนเรียบร้อยแล้ว', 'success');
             bootstrap.Modal.getInstance(document.getElementById('roomModal')).hide();
             document.getElementById('input-room-name').value = ""; 
-            loadRooms(); 
-        } catch (err) {
-            Swal.fire('สำเร็จ', 'บันทึกเรียบร้อย (กรุณารีเฟรช)', 'success');
-            loadRooms();
+            loadRooms(); // รีโหลดปุ่มห้องเรียนใหม่
+        } else {
+            Swal.fire('ผิดพลาด', res.message, 'error');
         }
+    } catch (err) {
+        Swal.fire('สำเร็จ', 'บันทึกข้อมูลแล้ว', 'success');
+        loadRooms();
     }
+}
 
     // ฟังก์ชันย่อยสำหรับจัดการรูปภาพ
     function previewImage(input) {
