@@ -445,20 +445,18 @@ async function saveRoomToSheet() {
 function previewImage(input) {
     const file = input.files[0];
     if (file) {
-        if (file.size > 2 * 1024 * 1024) {
-            Swal.fire('ไฟล์ใหญ่เกินไป', 'กรุณาใช้รูปภาพขนาดไม่เกิน 2MB', 'warning');
+        // จำกัดขนาดรูปไม่ให้เกิน 1MB เพื่อความเร็ว
+        if (file.size > 1 * 1024 * 1024) {
+            alert("รูปภาพต้องมีขนาดไม่เกิน 1MB");
             input.value = "";
             return;
         }
         const reader = new FileReader();
         reader.onload = (e) => {
-const fullBase64 = e.target.result;
-            // แสดงรูปตัวอย่างใน Modal
+            const fullBase64 = e.target.result;
             document.getElementById('imagePreview').src = fullBase64;
-            document.getElementById('imagePreview').style.display = 'inline-block';
-            
-            // *** เก็บเฉพาะข้อมูลรหัสภาพ (ตัด data:image/png;base64, ออก) ***
-            selectedFileBase64 = fullBase64.split(',')[1];
+            // เก็บเฉพาะรหัสภาพเพื่อส่งไป Save ใน Drive
+            selectedFileBase64 = fullBase64.split(',')[1]; 
         };
         reader.readAsDataURL(file);
     }
