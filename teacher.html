@@ -244,29 +244,39 @@ async function loadRooms() {
     }
 }
 
-async function deleteRoom(roomName) {
-    const confirm = await Swal.fire({
-        title: 'ลบห้องเรียน?',
-        text: `ยืนยันการลบห้อง ${roomName} และข้อมูลนักเรียนทั้งหมดในห้องนี้?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        confirmButtonText: 'ลบห้อง'
-    });
-
-    if (confirm.isConfirmed) {
-        Swal.fire({ title: 'กำลังลบ...', didOpen: () => Swal.showLoading() });
-        const res = await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'deleteRoom', roomName: roomName })
-        });
-        const result = await res.json();
-        if(result.success) {
-            Swal.fire('สำเร็จ', 'ลบห้องเรียนเรียบร้อย', 'success');
-            loadRooms();
-            if(currentRoomId === roomName) location.reload();
-        }
+function deleteRoom(roomName) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    // 1. ลบจากแผ่นงาน Room
+    var roomSheet = ss.getSheetByName("Room");
+    var roomData = roomSheet.getDataRange().getValues();
+    for (var i = roomData.length - 1; i >= 1; i--) {
+      if (roomData[i][0] == roomName) { // คอลัมน์ A คือ RoomID
+        roomSheet.deleteRow(i + 1);
+      }
     }
+    
+    // 2. ลบนักเรียนทั้งหมดที่อยู่ในห้องนั้น (Sheet Students)
+    var studentSheet = ss.getSheetByName("Students");
+    var studentData = studentSheet.getDataRange().getValues();
+    var newData = [studentData[0]]; // เก็บหัวตารางไว้
+    
+    for (var j = 1; j < studentData.length; j++) {
+      if (studentData[j][3] != roomName) { // คอลัมน์ D คือ RoomID
+        newData.push(studentData[j]);
+      }
+    }
+    
+    // เขียนข้อมูลใหม่กลับลงไป (เร็วกว่าการไล่ลบทีละแถวมาก)
+    studentSheet.clearContents();
+    studentSheet.getRange(1, 1, newData.length, newData[0].length).setValues(newData);
+    
+    return { success: true, message: "ลบห้องและนักเรียนเรียบร้อยแล้ว" };
+    
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
 }
 
 // === 2. โหลดข้อมูลนักเรียน (จัดการรูปภาพจาก Database) ===
