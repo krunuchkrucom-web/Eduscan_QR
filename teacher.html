@@ -191,16 +191,25 @@
     window.onload = loadRooms;
 
     async function loadRooms() {
-        try {
-            const res = await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'getRooms', userRole: userData.role, userName: userData.name })
-            });
-            const rooms = await res.json();
-            const container = document.getElementById('roomContainer');
-            container.innerHTML = rooms.length ? "" : '<small class="text-muted">ยังไม่มีห้องเรียนในระบบ</small>';
-            
-            rooms.forEach(room => {
+ // ดึงข้อมูล User จากระบบ Login
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    
+    try {
+        const res = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                action: 'getRooms', 
+                userRole: userData.role, 
+                userName: userData.name // ส่งชื่อไปเพื่อแยกสิทธิ์
+            })
+        });
+        const rooms = await res.json();
+        const container = document.getElementById('roomContainer');
+        
+        // แสดงผลห้องเรียนเฉพาะที่ครูคนนั้นมีสิทธิ์
+        container.innerHTML = rooms.length ? "" : '<small class="text-muted">คุณยังไม่มีห้องเรียนที่รับผิดชอบ</small>';
+        
+        rooms.forEach(room => {
                 container.innerHTML += `
                     <div class="room-btn-group shadow-sm rounded-3 overflow-hidden">
                         <button class="btn ${room.color} btn-room-main" onclick="selectRoom('${room.name}')">
