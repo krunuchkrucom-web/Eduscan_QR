@@ -28,9 +28,13 @@
             border-left: 1px solid rgba(255,255,255,0.3) !important;
             transition: 0.3s;
         }
+        /* ถ้าไม่ใช่ admin ปุ่มจะเป็นวงกลมปกติ */
+        .room-btn.no-admin { border-radius: 50px !important; }
+
         .room-btn.active {
             box-shadow: 0 0 0 3px rgba(0,0,0,0.2);
             font-weight: bold;
+            filter: brightness(0.9);
         }
 
         .table img {
@@ -75,7 +79,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="admin-room-panel" style="display: none;">
                         <div class="card p-4 shadow-sm rounded-4 text-white card-action" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="openRoomModal()">
                             <div class="d-flex align-items-center">
                                 <div class="bg-white bg-opacity-25 p-3 rounded-circle me-3"><i class="fa-solid fa-folder-plus fs-3"></i></div>
@@ -87,7 +91,8 @@
 
                 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                     <h6 class="fw-bold mb-3"><i class="fa-solid fa-layer-group me-2"></i>เลือกห้องเรียน</h6>
-                    <div class="d-flex flex-wrap" id="room-selection-area"></div>
+                    <div class="d-flex flex-wrap" id="room-selection-area">
+                        </div>
                 </div>
 
                 <div class="card border-0 shadow-sm rounded-4 p-4">
@@ -134,9 +139,7 @@
                         <div class="mb-3">
                             <label class="small fw-bold">ชื่อ-นามสกุล</label>
                             <input type="text" id="studentName" class="form-control rounded-pill" required
-                               pattern="^[a-zA-Zก-ฮะ-์\s]+$" 
-                               oninput="this.value = this.value.replace(/[0-9]/g, '')"
-                               title="กรุณากรอกเฉพาะตัวอักษรเท่านั้น">
+                               oninput="this.value = this.value.replace(/[0-9]/g, '')">
                         </div>
                         <div class="mb-3">
                             <label class="small fw-bold">รูปภาพนักเรียน</label>
@@ -164,17 +167,17 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="small fw-bold">ชื่อห้องเรียน</label>
-                        <input type="text" id="input-room-name" class="form-control rounded-pill">
+                        <input type="text" id="input-room-name" class="form-control rounded-pill" placeholder="เช่น ปวส.1/1">
                     </div>
                     <div class="mb-3">
-                        <label class="small fw-bold">โทนสี</label>
+                        <label class="small fw-bold">โทนสีปุ่ม</label>
                         <select id="input-room-color" class="form-select rounded-pill">
-                            <option value="btn-primary">สีน้ำเงิน (Default)</option>
+                            <option value="btn-primary">สีน้ำเงิน</option>
                             <option value="btn-success">สีเขียว</option>
                             <option value="btn-danger">สีแดง</option>
-                            <option value="btn-info text-white">สีฟ้าสดใส</option>
-                            <option value="btn-dark">สีดำ/เทาเข้ม</option>
-                            <option value="style='background-color: #8b5cf6; color: white;'">สีม่วง</option>
+                            <option value="btn-warning text-dark">สีเหลือง</option>
+                            <option value="btn-info text-white">สีฟ้า</option>
+                            <option value="btn-dark">สีดำ</option>
                         </select>
                     </div>
                 </div>
@@ -197,18 +200,24 @@ const DEFAULT_AVATAR = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 window.onload = function() {
     const auth = JSON.parse(localStorage.getItem('auth'));
     if (!auth) { window.location.href = "index.html"; return; }
+    
     document.getElementById('teacher-name-display').innerText = auth.name;
+    
+    // แสดงเมนูจัดการห้องเฉพาะ Admin
+    if(auth.role === 'admin'){
+        document.getElementById('admin-room-panel').style.display = 'block';
+    }
+    
     loadRooms(); 
 };
 
-// --- ฟังก์ชันแปลงลิงก์ Google Drive เพื่อให้แสดงผลใน img tag ได้ ---
+// แปลง Google Drive Link ให้แสดงรูปได้
 function getDirectLink(url) {
     if (!url || !url.includes('drive.google.com')) return url || DEFAULT_AVATAR;
     const fileId = url.match(/[-\w]{25,}/);
     return fileId ? `https://lh3.googleusercontent.com/d/${fileId[0]}` : url;
 }
 
-// --- ฟังก์ชันบีบอัดรูปภาพก่อนส่งไป Server ---
 function previewAndResizeImage(input) {
     const file = input.files[0];
     if (file) {
@@ -218,17 +227,16 @@ function previewAndResizeImage(input) {
             img.src = e.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 300; // บีบอัดให้กว้างไม่เกิน 300px
+                const MAX_WIDTH = 300;
                 const scale = MAX_WIDTH / img.width;
                 canvas.width = MAX_WIDTH;
                 canvas.height = img.height * scale;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                
-                const resizedBase64 = canvas.toDataURL('image/jpeg', 0.7); // คุณภาพ 70%
+                const resizedBase64 = canvas.toDataURL('image/jpeg', 0.7);
                 document.getElementById('imagePreview').src = resizedBase64;
                 document.getElementById('imagePreview').style.display = 'inline-block';
-                selectedFileBase64 = resizedBase64.split(',')[1]; // เก็บเฉพาะรหัส Base64
+                selectedFileBase64 = resizedBase64.split(',')[1];
             };
         };
         reader.readAsDataURL(file);
@@ -237,22 +245,38 @@ function previewAndResizeImage(input) {
 
 // === โหลดห้องเรียน ===
 async function loadRooms() {
+    const auth = JSON.parse(localStorage.getItem('auth'));
     const area = document.getElementById('room-selection-area');
     area.innerHTML = '<div class="spinner-border text-primary spinner-border-sm"></div>';
+    
     try {
-        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getRooms' }) });
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ 
+                action: 'getRooms', 
+                userRole: auth.role, 
+                userName: auth.name 
+            }) 
+        });
         const rooms = await response.json();
         area.innerHTML = ""; 
+        
         rooms.forEach(room => {
             const div = document.createElement('div');
             div.className = "room-btn-group d-inline-flex shadow-sm rounded-pill";
-            div.innerHTML = `
-                <button class="btn ${room.color || 'btn-primary'} room-btn" onclick="setActiveRoom(this, '${room.name}')">
-                    <i class="fa-solid fa-graduation-cap me-2"></i>${room.name}
-                </button>
+            
+            const isAdmin = auth.role === 'admin';
+            const deleteBtn = isAdmin ? `
                 <button class="btn ${room.color || 'btn-primary'} del-room-btn" onclick="confirmDeleteRoom('${room.name}')">
                     <i class="fa-solid fa-trash-can"></i>
+                </button>` : "";
+
+            div.innerHTML = `
+                <button class="btn ${room.color || 'btn-primary'} room-btn ${!isAdmin ? 'no-admin' : ''}" 
+                        onclick="setActiveRoom(this, '${room.name}')">
+                    <i class="fa-solid fa-graduation-cap me-2"></i>${room.name}
                 </button>
+                ${deleteBtn}
             `;
             area.appendChild(div);
         });
@@ -264,103 +288,8 @@ function setActiveRoom(btn, roomName) {
     btn.classList.add('active');
     loadStudentData(roomName);
 }
-    // 1. วาง Array สีไว้ด้านบนสุดเพื่อให้ฟังก์ชันต่างๆ เรียกใช้ได้
-  const roomColors = [
-    'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 
-    'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500',
-    'bg-orange-500', 'bg-cyan-500'
-  ];
 
-  function displayRooms(rooms) {
-    const container = document.getElementById('roomList'); // ตรวจสอบ ID ให้ตรงกับใน HTML ของคุณ
-    if (!container) return;
-    
-    container.innerHTML = ''; 
-
-    rooms.forEach((room, index) => {
-      // 2. ดึงสีตามลำดับ Index
-      const colorClass = roomColors[index % roomColors.length];
-
-      // 3. สร้าง HTML ของปุ่ม (ใช้โครงสร้างเดิมของคุณเพื่อให้ปุ่มลบยังทำงานได้)
-      const btnHtml = `
-        <div class="flex items-center ${colorClass} text-white rounded-full pl-4 pr-1 py-1 m-1 shadow-sm">
-          <span class="mr-2">${room.name}</span>
-          <button onclick="deleteRoom('${room.name}')" class="bg-black bg-opacity-20 hover:bg-opacity-40 rounded-full p-1 transition-all">
-            <i class="fas fa-trash-alt text-xs"></i>
-          </button>
-        </div>
-      `;
-      container.insertAdjacentHTML('beforeend', btnHtml);
-    });
-  }
-
-    // แก้ไขฟังก์ชันยืนยันการลบห้องเรียน
-async function confirmDeleteRoom(roomName) {
-    const result = await Swal.fire({
-        title: `ยืนยันการลบห้อง ${roomName}?`,
-        text: "ข้อมูลนักเรียนทั้งหมดในห้องนี้จะถูกลบออกด้วย!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'ใช่, ลบเลย!',
-        cancelButtonText: 'ยกเลิก'
-    });
-
-    if (result.isConfirmed) {
-        Swal.fire({ title: 'กำลังลบข้อมูล...', didOpen: () => Swal.showLoading() });
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'deleteRoom', roomName: roomName })
-            });
-            const res = await response.json();
-            if (res.success) {
-                Swal.fire('ลบเรียบร้อย!', '', 'success');
-                loadRooms(); // โหลดรายการห้องใหม่
-                // ถ้าห้องที่ลบเป็นห้องที่เปิดค้างอยู่ ให้ล้างตารางนักเรียน
-                if (currentRoomId === roomName) {
-                    document.getElementById('student-list-table').innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5">กรุณาเลือกห้องเรียนเพื่อดูข้อมูล</td></tr>';
-                    document.getElementById('current-room-display').innerText = "กรุณาเลือกห้อง";
-                }
-            }
-        } catch (e) {
-            Swal.fire('ผิดพลาด', 'ไม่สามารถเชื่อมต่อ Server ได้', 'error');
-        }
-    }
-}
-    function addNewRoom() {
-    Swal.fire({
-        title: 'เพิ่มห้องเรียนใหม่',
-        input: 'text',
-        inputLabel: 'ชื่อห้องเรียน (เช่น ปวส.1/1)',
-        showCancelButton: true,
-        inputValidator: (value) => {
-            if (!value) return 'กรุณากรอกชื่อห้องเรียน!';
-            
-            // ตรวจสอบกับปุ่มที่มีอยู่บนหน้าจอ ณ ตอนนั้น
-            const currentRooms = Array.from(document.querySelectorAll('.btn-room'))
-                                      .map(btn => btn.innerText.trim());
-            if (currentRooms.includes(value.trim())) {
-                return 'ห้องเรียนนี้มีอยู่แล้ว!';
-            }
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // ส่งข้อมูลไปบันทึกที่ Code.gs
-            google.script.run.withSuccessHandler(response => {
-                if(response.success) {
-                    Swal.fire('สำเร็จ', 'เพิ่มห้องเรียนเรียบร้อย', 'success');
-                    loadRooms(); // ฟังก์ชันโหลดรายการห้องใหม่
-                } else {
-                    Swal.fire('ผิดพลาด', response.message, 'error');
-                }
-            }).addRoom({ className: result.value, ... });
-        }
-    });
-}
-
-// === โหลดนักเรียน (จุดที่แก้ให้รูปภาพปรากฏ) ===
+// === โหลดนักเรียน ===
 async function loadStudentData(roomName) {
     currentRoomId = roomName;
     document.getElementById('current-room-display').innerText = roomName;
@@ -368,17 +297,20 @@ async function loadStudentData(roomName) {
     tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr>';
 
     try {
-        const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getStudentsByRoom', room: roomName }) });
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ action: 'getStudentsByRoom', room: roomName }) 
+        });
         const students = await response.json();
         tableBody.innerHTML = "";
         
         if (!students.length) {
-            tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">ไม่มีข้อมูลนักเรียน</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">ยังไม่มีรายชื่อนักเรียนในห้องนี้</td></tr>';
             return;
         }
 
         students.forEach((std, index) => {
-            const displayPhoto = getDirectLink(std.photo); // แปลงลิงก์ Drive ตรงนี้
+            const displayPhoto = getDirectLink(std.photo);
             tableBody.innerHTML += `
                 <tr>
                     <td>${index + 1}</td>
@@ -387,8 +319,12 @@ async function loadStudentData(roomName) {
                     <td class="fw-bold">${std.name}</td>
                     <td class="text-center">
                         <div class="btn-group shadow-sm rounded-pill">
-                            <button class="btn btn-sm btn-outline-primary" onclick="editStudent('${std.id}', '${std.name}', '${displayPhoto}')"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${std.id}')"><i class="fa-solid fa-trash"></i></button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editStudent('${std.id}', '${std.name}', '${displayPhoto}')">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${std.id}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>`;
@@ -398,31 +334,96 @@ async function loadStudentData(roomName) {
 
 // === บันทึกนักเรียน ===
 async function submitStudentForm() {
-    const id = document.getElementById('studentId').value;
-    const name = document.getElementById('studentName').value;
-    // ตรวจสอบว่าชื่อมีตัวเลขปนอยู่หรือไม่
-    const nameRegex = /\d/; // เช็คว่ามีตัวเลข (0-9) ไหม
-    if (nameRegex.test(name)) {
-        return Swal.fire('รูปแบบชื่อไม่ถูกต้อง', 'ชื่อ-นามสกุล ห้ามมีตัวเลขประกอบ', 'error');
-    }
-    if(!id || !name) return Swal.fire('ข้อมูลไม่ครบ', '', 'warning');
+    const id = document.getElementById('studentId').value.trim();
+    const name = document.getElementById('studentName').value.trim();
+    
+    if(!id || !name) return Swal.fire('กรุณากรอกข้อมูลให้ครบ', '', 'warning');
+    if(!currentRoomId) return Swal.fire('กรุณาเลือกห้องเรียนก่อน', '', 'warning');
 
     Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'processStudentData', id, name, photo: selectedFileBase64, room: currentRoomId })
+            body: JSON.stringify({ 
+                action: 'processStudentData', 
+                id, 
+                name, 
+                photo: selectedFileBase64, 
+                room: currentRoomId 
+            })
         });
         const res = await response.json();
         if(res.success) {
-            Swal.fire('สำเร็จ', '', 'success');
+            Swal.fire('สำเร็จ', 'บันทึกข้อมูลเรียบร้อย', 'success');
             bootstrap.Modal.getInstance(document.getElementById('studentModal')).hide();
             loadStudentData(currentRoomId);
         }
-    } catch (e) { Swal.fire('ผิดพลาด', 'Server Connection Failed', 'error'); }
+    } catch (e) { Swal.fire('ผิดพลาด', 'ไม่สามารถเชื่อมต่อ Server', 'error'); }
 }
 
-// ฟังก์ชันเสริมอื่นๆ คงเดิม
+// === จัดการห้องเรียน ===
+async function saveRoomToSheet() {
+    const auth = JSON.parse(localStorage.getItem('auth'));
+    const name = document.getElementById('input-room-name').value.trim();
+    const color = document.getElementById('input-room-color').value;
+
+    if(!name) return Swal.fire('กรุณากรอกชื่อห้อง', '', 'warning');
+
+    Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+    try {
+        const response = await fetch(API_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ 
+                action: 'addRoom', 
+                roomName: name, 
+                roomColor: color,
+                userName: auth.name 
+            }) 
+        });
+        const res = await response.json();
+        if(res.success) {
+            Swal.fire('สำเร็จ', 'เพิ่มห้องเรียนเรียบร้อย', 'success');
+            loadRooms();
+            bootstrap.Modal.getInstance(document.getElementById('roomModal')).hide();
+            document.getElementById('input-room-name').value = "";
+        } else {
+            Swal.fire('แจ้งเตือน', res.message, 'warning');
+        }
+    } catch (e) { Swal.fire('ผิดพลาด', 'ไม่สามารถติดต่อเซิร์ฟเวอร์', 'error'); }
+}
+
+async function confirmDeleteRoom(roomName) {
+    const result = await Swal.fire({
+        title: `ยืนยันการลบห้อง ${roomName}?`,
+        text: "ข้อมูลนักเรียนทั้งหมดในห้องนี้จะหายไป!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'ลบเลย',
+        cancelButtonText: 'ยกเลิก'
+    });
+
+    if (result.isConfirmed) {
+        Swal.fire({ title: 'กำลังลบ...', didOpen: () => Swal.showLoading() });
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'deleteRoom', roomName: roomName })
+            });
+            const res = await response.json();
+            if (res.success) {
+                Swal.fire('ลบสำเร็จ!', '', 'success');
+                loadRooms();
+                if (currentRoomId === roomName) {
+                    tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5">กรุณาเลือกห้องเรียนเพื่อดูข้อมูล</td></tr>';
+                    document.getElementById('current-room-display').innerText = "กรุณาเลือกห้อง";
+                }
+            }
+        } catch (e) { Swal.fire('ผิดพลาด', 'ลบไม่สำเร็จ', 'error'); }
+    }
+}
+
+// Helpers
 function openAddStudentModal() {
     if(!currentRoomId) return Swal.fire('กรุณาเลือกห้องก่อน', '', 'info');
     document.getElementById('studentForm').reset();
@@ -443,19 +444,11 @@ function editStudent(id, name, photoUrl) {
 }
 
 async function deleteStudent(id) {
-    const res = await Swal.fire({ title: 'ยืนยันการลบ?', showCancelButton: true });
+    const res = await Swal.fire({ title: 'ลบนักเรียนคนนี้?', icon: 'warning', showCancelButton: true });
     if(res.isConfirmed) {
         await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteStudent', id }) });
         loadStudentData(currentRoomId);
     }
-}
-
-async function saveRoomToSheet() {
-    const name = document.getElementById('input-room-name').value;
-    const color = document.getElementById('input-room-color').value;
-    await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addRoom', roomName: name, roomColor: color }) });
-    loadRooms();
-    bootstrap.Modal.getInstance(document.getElementById('roomModal')).hide();
 }
 
 function openRoomModal() { new bootstrap.Modal(document.getElementById('roomModal')).show(); }
