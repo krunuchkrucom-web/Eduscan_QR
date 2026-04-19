@@ -259,6 +259,45 @@ function setActiveRoom(btn, roomName) {
     btn.classList.add('active');
     loadStudentData(roomName);
 }
+    // 1. วาง Array สีไว้ด้านบนสุดเพื่อให้ฟังก์ชันต่างๆ เรียกใช้ได้
+  const roomColors = [
+    'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 
+    'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500',
+    'bg-orange-500', 'bg-cyan-500'
+  ];
+
+  function displayRooms(rooms) {
+    const container = document.getElementById('roomList'); // ตรวจสอบ ID ให้ตรงกับใน HTML ของคุณ
+    if (!container) return;
+    
+    container.innerHTML = ''; 
+
+    rooms.forEach((room, index) => {
+      // 2. ดึงสีตามลำดับ Index
+      const colorClass = roomColors[index % roomColors.length];
+
+      // 3. สร้าง HTML ของปุ่ม (ใช้โครงสร้างเดิมของคุณเพื่อให้ปุ่มลบยังทำงานได้)
+      const btnHtml = `
+        <div class="flex items-center ${colorClass} text-white rounded-full pl-4 pr-1 py-1 m-1 shadow-sm">
+          <span class="mr-2">${room.name}</span>
+          <button onclick="deleteRoom('${room.name}')" class="bg-black bg-opacity-20 hover:bg-opacity-40 rounded-full p-1 transition-all">
+            <i class="fas fa-trash-alt text-xs"></i>
+          </button>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', btnHtml);
+    });
+  }
+
+    function deleteRoom(name) {
+  if(confirm('คุณแน่ใจใช่ไหมที่จะลบห้อง ' + name)) {
+    // เรียกฟังก์ชันใน Code.gs
+    google.script.run.withSuccessHandler(function(res) {
+      alert('ลบห้องเรียนเรียบร้อยแล้ว');
+      loadRooms(); // โหลดรายการห้องใหม่หลังลบเสร็จ
+    }).deleteRoomFromServer(name); 
+  }
+}
 
 // === โหลดนักเรียน (จุดที่แก้ให้รูปภาพปรากฏ) ===
 async function loadStudentData(roomName) {
