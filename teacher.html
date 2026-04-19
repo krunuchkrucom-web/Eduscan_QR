@@ -203,7 +203,6 @@ window.onload = function() {
     
     document.getElementById('teacher-name-display').innerText = auth.name;
     
-    // แสดงเมนูจัดการห้องเฉพาะ Admin
     if(auth.role === 'admin'){
         document.getElementById('admin-room-panel').style.display = 'block';
     }
@@ -211,11 +210,11 @@ window.onload = function() {
     loadRooms(); 
 };
 
-// แปลง Google Drive Link ให้แสดงรูปได้
 function getDirectLink(url) {
     if (!url || !url.includes('drive.google.com')) return url || DEFAULT_AVATAR;
     const fileId = url.match(/[-\w]{25,}/);
-    return fileId ? `https://lh3.googleusercontent.com/d/${fileId[0]}` : url;
+    // แก้ไข URL ให้ดึงรูปตรงๆ ได้เสถียรขึ้น
+    return fileId ? `https://lh3.googleusercontent.com/u/0/d/${fileId[0]}` : url;
 }
 
 function previewAndResizeImage(input) {
@@ -243,7 +242,6 @@ function previewAndResizeImage(input) {
     }
 }
 
-// === โหลดห้องเรียน ===
 async function loadRooms() {
     const auth = JSON.parse(localStorage.getItem('auth'));
     const area = document.getElementById('room-selection-area');
@@ -261,6 +259,11 @@ async function loadRooms() {
         const rooms = await response.json();
         area.innerHTML = ""; 
         
+        if (rooms.length === 0) {
+            area.innerHTML = '<small class="text-muted">ยังไม่มีห้องเรียน</small>';
+            return;
+        }
+
         rooms.forEach(room => {
             const div = document.createElement('div');
             div.className = "room-btn-group d-inline-flex shadow-sm rounded-pill";
@@ -289,7 +292,6 @@ function setActiveRoom(btn, roomName) {
     loadStudentData(roomName);
 }
 
-// === โหลดนักเรียน ===
 async function loadStudentData(roomName) {
     currentRoomId = roomName;
     document.getElementById('current-room-display').innerText = roomName;
@@ -332,7 +334,6 @@ async function loadStudentData(roomName) {
     } catch (e) { tableBody.innerHTML = "เกิดข้อผิดพลาดในการโหลด"; }
 }
 
-// === บันทึกนักเรียน ===
 async function submitStudentForm() {
     const id = document.getElementById('studentId').value.trim();
     const name = document.getElementById('studentName').value.trim();
@@ -361,7 +362,6 @@ async function submitStudentForm() {
     } catch (e) { Swal.fire('ผิดพลาด', 'ไม่สามารถเชื่อมต่อ Server', 'error'); }
 }
 
-// === จัดการห้องเรียน ===
 async function saveRoomToSheet() {
     const auth = JSON.parse(localStorage.getItem('auth'));
     const name = document.getElementById('input-room-name').value.trim();
@@ -369,7 +369,7 @@ async function saveRoomToSheet() {
 
     if(!name) return Swal.fire('กรุณากรอกชื่อห้อง', '', 'warning');
 
-    Swal.fire({ title: 'กำลังบันทึก...', didOpen: () => Swal.showLoading() });
+    Swal.fire({ title: 'กำลังตรวจสอบและบันทึก...', didOpen: () => Swal.showLoading() });
     try {
         const response = await fetch(API_URL, { 
             method: 'POST', 
@@ -415,15 +415,15 @@ async function confirmDeleteRoom(roomName) {
                 Swal.fire('ลบสำเร็จ!', '', 'success');
                 loadRooms();
                 if (currentRoomId === roomName) {
-                    tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5">กรุณาเลือกห้องเรียนเพื่อดูข้อมูล</td></tr>';
+                    document.getElementById('student-list-table').innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5">กรุณาเลือกห้องเรียนเพื่อดูข้อมูล</td></tr>';
                     document.getElementById('current-room-display').innerText = "กรุณาเลือกห้อง";
+                    currentRoomId = "";
                 }
             }
         } catch (e) { Swal.fire('ผิดพลาด', 'ลบไม่สำเร็จ', 'error'); }
     }
 }
 
-// Helpers
 function openAddStudentModal() {
     if(!currentRoomId) return Swal.fire('กรุณาเลือกห้องก่อน', '', 'info');
     document.getElementById('studentForm').reset();
@@ -446,7 +446,9 @@ function editStudent(id, name, photoUrl) {
 async function deleteStudent(id) {
     const res = await Swal.fire({ title: 'ลบนักเรียนคนนี้?', icon: 'warning', showCancelButton: true });
     if(res.isConfirmed) {
+        Swal.fire({ title: 'กำลังลบ...', didOpen: () => Swal.showLoading() });
         await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteStudent', id }) });
+        Swal.fire('ลบเรียบร้อย', '', 'success');
         loadStudentData(currentRoomId);
     }
 }
