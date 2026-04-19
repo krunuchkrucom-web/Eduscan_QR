@@ -245,6 +245,9 @@
                         </td>
                         <td>${s.name}</td>
                         <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary border-0 me-1" onclick="editStudent('${s.id}', '${s.name}', '${s.photo}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
                             <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteStudent('${s.id}')">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -253,6 +256,25 @@
             });
         } catch (e) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>'; }
     }
+
+    function editStudent(id, name, photo) {
+    document.getElementById('stdId').value = id;
+    document.getElementById('stdId').readOnly = true; // ล็อครหัสไม่ให้แก้ (เพราะเป็น Key หลัก)
+    document.getElementById('stdName').value = name;
+    document.getElementById('previewImg').src = photo || "https://via.placeholder.com/80x100";
+    
+    // เปิด Modal
+    const studentModal = new bootstrap.Modal(document.getElementById('studentModal'));
+    studentModal.show();
+}
+
+// แก้ไขเพิ่ม: เมื่อปิด Modal ให้ปลดล็อค readOnly ด้วย
+document.getElementById('studentModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('stdId').readOnly = false;
+    document.getElementById('studentForm').reset();
+    document.getElementById('previewImg').src = "https://via.placeholder.com/80x100";
+    base64Photo = "";
+});
 
     async function addRoom() {
         const name = document.getElementById('newRoomName').value;
