@@ -191,8 +191,8 @@
     window.onload = loadRooms;
 
     async function loadRooms() {
- // ดึงข้อมูล User จากระบบ Login
-    const userData = JSON.parse(localStorage.getItem('userData'));
+// แก้ไข: เพิ่มบรรทัดนี้เพื่อให้แน่ใจว่ามีข้อมูล User ก่อนส่งไป Request
+    const userData = JSON.parse(localStorage.getItem('userData')) || { name: 'admin', role: 'admin' };
     
     try {
         const res = await fetch(WEB_APP_URL, {
@@ -200,7 +200,7 @@
             body: JSON.stringify({ 
                 action: 'getRooms', 
                 userRole: userData.role, 
-                userName: userData.name // ส่งชื่อไปเพื่อแยกสิทธิ์
+                userName: userData.name 
             })
         });
         const rooms = await res.json();
