@@ -231,9 +231,13 @@
                 body: JSON.stringify({ action: 'getStudentsByRoom', room: currentRoom })
             });
             const students = await res.json();
+            // --- ส่วนที่เพิ่มเข้าไปเพื่อเรียงลำดับรหัส ---
+            students.sort((a, b) => {
+            return a.id.localeCompare(b.id); // เรียงจากน้อยไปมาก
+        });
             tbody.innerHTML = students.length ? "" : '<tr><td colspan="5" class="text-center py-4">ไม่พบรายชื่อนักเรียนในห้องนี้</td></tr>';
             
-            students.forEach(s => {
+            students.forEach(s,index => {
                 tbody.innerHTML += `
                     <tr>
                         <td class="fw-bold">${s.num}</td>
