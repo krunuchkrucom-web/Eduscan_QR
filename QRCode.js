@@ -7,7 +7,7 @@ let qrcode = null;
 
 window.onload = loadRooms;
 
-// 1. ดึงรายชื่อห้องเรียน
+// ดึงรายชื่อห้องเรียน
 async function loadRooms() {
     try {
         const res = await fetch(WEB_APP_URL, {
@@ -27,16 +27,13 @@ async function loadRooms() {
     } catch (e) { console.error("Load Rooms Error:", e); }
 }
 
-// 2. ดึงรายชื่อนักเรียนเมื่อเลือกห้อง
+// ดึงรายชื่อนักเรียนเมื่อเลือกห้อง
 async function selectRoom(name) {
     currentRoom = name;
     document.getElementById('currentRoomText').innerText = name;
     const tbody = document.getElementById('studentTableBody');
     tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary me-2"></div>กำลังโหลด...</td></tr>';
     
-    // ปิดปุ่มปริ้นชั่วคราวก่อนโหลดเสร็จ
-    if (document.getElementById('btnPrintAll')) document.getElementById('btnPrintAll').disabled = true;
-
     try {
         const res = await fetch(WEB_APP_URL, {
             method: 'POST',
@@ -64,26 +61,21 @@ async function selectRoom(name) {
                     </td>
                 </tr>`;
         });
-
-        // เปิดใช้งานปุ่มปริ้นทั้งห้องเมื่อโหลดข้อมูลเสร็จ
-        const btnPrintAll = document.getElementById('btnPrintAll');
-        if (btnPrintAll) btnPrintAll.disabled = false;
-
     } catch (e) { 
         tbody.innerHTML = '<tr><td colspan="3" class="text-danger text-center py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>'; 
     }
 }
 
-// 3. ฟังก์ชันสร้าง QR และบันทึกลง Google Sheets
+// ฟังก์ชันสร้าง QR และบันทึกลง Google Sheets
 async function generateQR(id, name) {
+    // 1. จัดการ UI เบื้องต้น
     document.getElementById('qrPlaceholder').style.display = "none";
     const canvas = document.getElementById('canvasQR');
-    canvas.innerHTML = '<div class="spinner-border text-primary"></div>';
+    canvas.innerHTML = '<div class="spinner-border text-primary"></div>'; // แสดง Loading ระหว่างรอ
     document.getElementById('btnDl').disabled = true;
-    if (document.getElementById('btnPrintSingle')) document.getElementById('btnPrintSingle').disabled = true;
 
     try {
-        // บันทึกลง Sheet
+        // 2. บันทึกประวัติการสร้างลงใน Log_QR Sheet
         await fetch(WEB_APP_URL, {
             method: 'POST',
             body: JSON.stringify({ 
@@ -94,10 +86,10 @@ async function generateQR(id, name) {
             })
         });
 
-        // สร้าง QR บนจอ
-        canvas.innerHTML = "";
+        // 3. สร้างรูป QR Code หลังจากบันทึก Log สำเร็จ
+        canvas.innerHTML = ""; // ล้าง Loading
         qrcode = new QRCode(canvas, {
-            text: id,
+            text: id, // ข้อมูลใน QR คือรหัสนักเรียน
             width: 200,
             height: 200,
             colorDark : "#0d6efd",
@@ -105,93 +97,18 @@ async function generateQR(id, name) {
             correctLevel : QRCode.CorrectLevel.H
         });
 
+        // 4. อัปเดตข้อมูลบนหน้าจอ
         document.getElementById('qrName').innerText = name;
-        document.getElementById('qrId').innerText = "ID: " + id;
+        document.getElementById('qrId').innerText = "รหัส: " + id;
         document.getElementById('btnDl').disabled = false;
-        if (document.getElementById('btnPrintSingle')) document.getElementById('btnPrintSingle').disabled = false;
 
     } catch (e) {
         console.error("Generate QR Error:", e);
-        canvas.innerHTML = '<i class="fas fa-exclamation-triangle text-danger fa-3x"></i>';
+        canvas.innerHTML = '<i class="fas fa-exclamation-triangle text-danger fa-3x"></i><p class="small">บันทึกข้อมูลไม่สำเร็จ</p>';
     }
 }
 
-// 4. ฟังก์ชันปริ้นเฉพาะคนที่เลือก
-function printSingleQR() {
-    const name = document.getElementById('qrName').innerText;
-    const id = document.getElementById('qrId').innerText;
-    const canvasImg = document.querySelector('#canvasQR img');
-    
-    if (!canvasImg) {
-        alert("กรุณาสร้าง QR Code ก่อนสั่งปริ้น");
-        return;
-    }
-
-    const qrImg = canvasImg.src;
-    const printArea = document.getElementById('printSection');
-    printArea.innerHTML = `
-        <div style="text-align:center; padding-top: 50px;">
-            <h2 style="margin-bottom:20px;">QR Code สำหรับนักเรียน</h2>
-            <div style="border: 2px solid #333; display:inline-block; padding:30px; border-radius:15px;">
-                <img src="${qrImg}" style="width: 300px;">
-                <h2 style="margin-top:20px; font-size: 28px;">${name}</h2>
-                <h3 style="color:#666;">รหัสนักเรียน: ${id.replace('ID: ', '')}</h3>
-            </div>
-        </div>
-    `;
-    window.print();
-}
-
-// 5. ฟังก์ชันปริ้นทั้งห้อง
-async function printAllRoom() {
-    if (!currentRoom) return;
-    
-    const printArea = document.getElementById('printSection');
-    printArea.innerHTML = `
-        <div style="padding: 20px;">
-            <h2 style="text-align:center; margin-bottom:30px;">ชุด QR Code ทั้งห้องเรียน: ${currentRoom}</h2>
-            <div id="printGrid" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;"></div>
-        </div>
-    `;
-    const grid = printArea.querySelector('#printGrid');
-    const btn = document.getElementById('btnPrintAll');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเตรียม...';
-
-    try {
-        const res = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'getStudentsByRoom', room: currentRoom })
-        });
-        const students = await res.json();
-
-        for (const s of students) {
-            const div = document.createElement('div');
-            div.style = "width: 180px; border: 1px solid #ccc; padding: 15px; text-align: center; border-radius: 10px;";
-            div.innerHTML = `
-                <div id="tempQR_${s.id}" style="display: flex; justify-content: center;"></div>
-                <div style="font-weight:bold; margin-top:10px;">${s.name}</div>
-                <div style="font-size:12px; color: #666;">ID: ${s.id}</div>
-            `;
-            grid.appendChild(div);
-
-            new QRCode(document.getElementById(`tempQR_${s.id}`), {
-                text: s.id,
-                width: 140,
-                height: 140
-            });
-        }
-
-        btn.innerHTML = originalText;
-        setTimeout(() => { window.print(); }, 800);
-
-    } catch (e) {
-        btn.innerHTML = originalText;
-        alert("ไม่สามารถโหลดข้อมูลเพื่อปริ้นได้");
-    }
-}
-
-// 6. ฟังก์ชันทั่วไป
+// ดาวน์โหลดรูป QR
 function downloadQR() {
     const img = document.querySelector('#canvasQR img');
     if (!img) return;
@@ -201,6 +118,7 @@ function downloadQR() {
     link.click();
 }
 
+// ออกจากระบบ
 function logout() {
     localStorage.clear();
     window.location.href = "index.html";
