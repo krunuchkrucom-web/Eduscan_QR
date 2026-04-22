@@ -16,20 +16,7 @@
         .nav-link.active { background: #0d6efd; color: white !important; }
         .logout-link { color: #dc3545; margin-top: 50px; display: block; text-decoration: none; padding: 12px 15px; }
         .qr-placeholder { width: 200px; height: 200px; border: 2px dashed #ddd; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
-        #canvasQR img { margin: 0 auto; border-radius: 10px; border: 1px solid #eee; }
-        
-        /* สไตล์สำหรับหน้าปริ้น */
-        @media print {
-            body * { visibility: hidden; }
-            #printSection, #printSection * { visibility: visible; }
-            #printSection {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                display: block !important;
-            }
-        }
+        #canvasQR img { margin: 0 auto; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -39,11 +26,11 @@
         <div class="col-md-2 sidebar d-none d-md-block">
             <div class="brand-title">EduTrack QR</div>
             <nav class="nav flex-column mt-4">
-                <a class="nav-link" href="teacher.html"><i class="fas fa-users me-2"></i> จัดการนักเรียน</a>
-                <a class="nav-link active" href="qrcode.html"><i class="fas fa-qrcode me-2"></i> สร้าง QR Code</a>
-                <a class="nav-link" href="scanner.html"><i class="fas fa-camera"></i> สแกนเข้าเรียน/ส่งงาน</a>
-                <a class="nav-link" href="reports.html"><i class="fas fa-chart-pie me-2"></i> สรุปผลการเรียน</a>
-                <a href="#" class="logout-link" onclick="logout()"><i class="fas fa-power-off me-2"></i> ออกจากระบบ</a>
+                <a class="nav-link" href="teacher.html"><i class="fas fa-users"></i> จัดการนักเรียน</a>
+                <a class="nav-link active" href="qrcode.html"><i class="fas fa-qrcode"></i> สร้าง QR Code</a>
+                <a class="nav-link" href="scanner.html"><i class="fas fa-camera"></i> สแกนเข้าเรียน</a>
+                <a class="nav-link" href="reports.html"><i class="fas fa-chart-pie"></i> สรุปผลการเรียน</a>
+                <a href="#" class="logout-link" onclick="logout()"><i class="fas fa-power-off"></i> ออกจากระบบ</a>
             </nav>
         </div>
 
@@ -55,15 +42,10 @@
                 <div id="roomContainer" class="d-flex flex-wrap"></div>
             </div>
 
-            <div class="row g-4">
+            <div class="row">
                 <div class="col-md-7">
                     <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="mb-0 text-secondary">2. เลือกนักเรียน (ห้อง: <span id="currentRoomText" class="fw-bold text-primary">กรุณาเลือกห้อง</span>)</h6>
-                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="printAllRoom()" id="btnPrintAll" disabled>
-                                <i class="fas fa-print me-1"></i> ปริ้นทั้งห้อง
-                            </button>
-                        </div>
+                        <h6 class="mb-3 text-secondary">2. เลือกนักเรียน (ห้อง: <span id="currentRoomText" class="fw-bold text-primary">กรุณาเลือกห้อง</span>)</h6>
                         <div class="table-responsive">
                             <table class="table align-middle">
                                 <thead class="table-light">
@@ -74,7 +56,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="studentTableBody">
-                                    <tr><td colspan="3" class="text-center py-5 text-muted">กรุณาเลือกห้องเรียนด้านบน</td></tr>
+                                    <tr><td colspan="3" class="text-center py-5">กรุณาเลือกห้องเรียน</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -84,31 +66,17 @@
                 <div class="col-md-5 text-center">
                     <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
                         <h6 class="mb-4 text-start text-secondary">3. QR Code ของคุณ</h6>
-                        
-                        <div class="d-flex justify-content-center align-items-center mb-3" style="min-height: 220px;">
+                        <div class="d-flex justify-content-center mb-3">
                             <div id="qrPlaceholder" class="qr-placeholder">
                                 <i class="fas fa-qrcode fa-4x text-muted opacity-25"></i>
                             </div>
                             <div id="canvasQR"></div>
                         </div>
-
-                        <div id="qrInfo" class="mb-4">
-                            <h5 id="qrName" class="fw-bold mb-1">-</h5>
-                            <p id="qrId" class="text-muted mb-0">-</p>
-                        </div>
-
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <button class="btn btn-success w-100 rounded-pill py-2" id="btnDl" onclick="downloadQR()" disabled>
-                                    <i class="fas fa-download me-1"></i> ดาวน์โหลด
-                                </button>
-                            </div>
-                            <div class="col-6">
-                                <button class="btn btn-dark w-100 rounded-pill py-2" id="btnPrintSingle" onclick="printSingleQR()" disabled>
-                                    <i class="fas fa-print me-1"></i> ปริ้นภาพนี้
-                                </button>
-                            </div>
-                        </div>
+                        <h5 id="qrName" class="fw-bold mt-2">-</h5>
+                        <p id="qrId" class="text-muted">-</p>
+                        <button class="btn btn-success w-100 rounded-pill mt-3 py-2" id="btnDl" onclick="downloadQR()" disabled>
+                            <i class="fas fa-download me-2"></i> ดาวน์โหลดภาพ QR Code
+                        </button>
                     </div>
                 </div>
             </div>
@@ -116,10 +84,7 @@
     </div>
 </div>
 
-<div id="printSection" style="display: none;"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="QRCode.js"></script>
-</body>
+<script src="QRCode.js"></script> </body>
 </html>
