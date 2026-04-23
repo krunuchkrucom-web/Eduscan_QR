@@ -1,5 +1,5 @@
 // ตั้งค่า URL ของคุณที่นี่
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx-_wojFp6rkj_FRyfWo2K1eQvjyiLKeEQbjDTolRcvPzInyC6q5CmWpE0M2cC-pMPIhQ/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz7N0cfEGWZWVMC4Pjenxne4zHkFarqlj2qDIO6rGtXYi2zSWH-2wAUxmVCtyM4ysrOVA/exec";
 
 let currentRoom = "";
 let userData = JSON.parse(localStorage.getItem('userData')) || { name: 'admin', role: 'admin' };
