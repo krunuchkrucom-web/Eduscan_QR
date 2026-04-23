@@ -6,37 +6,43 @@
     <title>EduTrack QR - Classroom Pro Hub</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
     <div id="loader" class="loader-overlay" style="display:none;">
         <div class="text-center text-white">
             <div class="spinner-border mb-2" role="status"></div>
-            <div>กำลังประมวลผล...</div>
+            <div class="fw-bold">กำลังประมวลผลอัจฉริยะ...</div>
         </div>
     </div>
 
     <div id="app">
-        <div id="role-view" class="container d-flex align-items-center justify-content-center min-vh-100">
+        <div id="role-view" class="container d-flex align-items-center justify-content-center min-vh-100 animate__animated animate__fadeIn">
             <div class="text-center w-100" style="max-width: 800px;">
                 <div class="mb-5">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2997/2997313.png" width="80" class="mb-3">
-                    <h1 class="fw-bold">EduTrack <span class="text-primary">QR</span></h1>
-                    <p class="text-muted">ระบบจัดการห้องเรียนและเช็คชื่ออัจฉริยะ</p>
+                    <div class="icon-circle mb-4 mx-auto shadow-lg">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2997/2997313.png" width="60">
+                    </div>
+                    <h1 class="fw-bold display-5">EduTrack <span class="text-primary">QR</span></h1>
+                    <p class="text-muted lead">Professional Classroom Management Hub</p>
                 </div>
                 <div class="row g-4 justify-content-center">
                     <div class="col-md-5">
                         <div class="role-card shadow-sm p-4 bg-white rounded-4 h-100" onclick="selectRole('Student')">
-                            <div class="mb-3"><img src="https://cdn-icons-png.flaticon.com/512/3429/3429433.png" width="60"></div>
+                            <div class="mb-3 card-icon student-bg"><img src="https://cdn-icons-png.flaticon.com/512/3429/3429433.png" width="60"></div>
                             <h4 class="fw-bold">สำหรับนักเรียน</h4>
-                            <p class="small text-muted mb-0">ดูสถิติมาเรียน & ส่งงาน</p>
+                            <p class="small text-muted mb-0">เช็คชื่อเข้าเรียน & ติดตามภาระงาน</p>
                         </div>
                     </div>
                     <div class="col-md-5">
                         <div class="role-card shadow-sm p-4 bg-white rounded-4 h-100" onclick="selectRole('Teacher')">
-                            <div class="mb-3"><img src="https://cdn-icons-png.flaticon.com/512/906/906175.png" width="60"></div>
+                            <div class="mb-3 card-icon teacher-bg"><img src="https://cdn-icons-png.flaticon.com/512/906/906175.png" width="60"></div>
                             <h4 class="fw-bold">สำหรับผู้สอน</h4>
-                            <p class="small text-muted mb-0">จัดการข้อมูล & ตั้งค่าระบบ</p>
+                            <p class="small text-muted mb-0">จัดการสถิติ & สแกนตรวจสอบงาน</p>
                         </div>
                     </div>
                 </div>
@@ -44,69 +50,78 @@
         </div>
 
         <div id="login-view" class="container min-vh-100 d-flex align-items-center justify-content-center" style="display:none !important;">
-            <div class="w-100" style="max-width: 400px;">
+            <div class="w-100 animate__animated animate__zoomIn" style="max-width: 400px;">
                 <div class="text-center mb-4">
-                    <button class="btn btn-sm btn-outline-secondary rounded-pill mb-3" onclick="backToRole()">← กลับหน้าเลือกบทบาท</button>
+                    <button class="btn btn-sm btn-link text-decoration-none text-muted mb-3" onclick="backToRole()"><i class="fas fa-arrow-left me-1"></i> กลับหน้าเลือกบทบาท</button>
                     <h2 class="fw-bold text-primary">เข้าสู่ระบบ</h2>
-                    <p id="role-badge" class="badge rounded-pill shadow-sm px-3 py-2"></p>
+                    <p id="role-badge" class="badge rounded-pill shadow-sm px-3 py-2 mt-2"></p>
                 </div>
                 <div class="card border-0 shadow-lg p-4 rounded-5 bg-white">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Username</label>
-                        <input type="text" id="username" class="form-control rounded-pill border-0 bg-light px-3 py-2" placeholder="กรอกชื่อผู้ใช้">
+                        <label class="form-label small fw-bold">ชื่อผู้ใช้ (Username)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-user text-primary"></i></span>
+                            <input type="text" id="username" class="form-control rounded-end-pill border-0 bg-light px-3 py-2" placeholder="กรอกชื่อผู้ใช้">
+                        </div>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label small fw-bold">Password</label>
-                        <input type="password" id="password" class="form-control rounded-pill border-0 bg-light px-3 py-2" placeholder="กรอกรหัสผ่าน">
+                        <label class="form-label small fw-bold">รหัสผ่าน (Password)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-lock text-primary"></i></span>
+                            <input type="password" id="password" class="form-control rounded-end-pill border-0 bg-light px-3 py-2" placeholder="กรอกรหัสผ่าน">
+                        </div>
                     </div>
-                    <button onclick="handleLogin()" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow">เข้าสู่ระบบ</button>
+                    <button onclick="handleLogin()" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">เข้าสู่ระบบทันที</button>
                 </div>
             </div>
         </div>
 
         <div id="main-view" style="display:none;">
             <div id="layout-wrapper" class="d-flex">
-                <nav id="teacher-sidebar" class="bg-white p-3 shadow-sm border-end d-flex flex-column" style="width: 260px; min-height: 100vh; position: sticky; top: 0;">
-                    <div class="logo-area d-flex align-items-center mb-4 pb-3 border-bottom">
+                <nav id="teacher-sidebar" class="bg-white p-3 shadow-sm border-end d-flex flex-column" style="width: 280px; min-height: 100vh; position: sticky; top: 0;">
+                    <div class="logo-area d-flex align-items-center mb-4 pb-3 border-bottom px-2">
                         <img src="https://cdn-icons-png.flaticon.com/512/2997/2997313.png" width="30" class="me-2">
-                        <h6 class="fw-bold text-primary mb-0">EduTrack QR</h6>
+                        <h6 class="fw-bold text-primary mb-0">EduTrack <span class="text-dark">PRO</span></h6>
                     </div>
-                    <ul class="nav nav-pills flex-column mb-auto">
+                    <ul class="nav nav-pills flex-column mb-auto gap-2">
                         <li class="nav-item">
-                            <a href="#" class="nav-link active rounded-3" onclick="showDashboard(this)">🏠 จัดการชั้นเรียน</a>
+                            <a href="#" class="nav-link active rounded-4 py-2" onclick="showDashboard(this)"><i class="fas fa-columns me-2"></i> แดชบอร์ดจัดการ</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link rounded-3" onclick="showCreateQR(this)">🖼️ สร้าง QR Code</a>
+                            <a href="#" class="nav-link rounded-4 py-2" onclick="showCreateQR(this)"><i class="fas fa-qrcode me-2"></i> สร้าง QR Code</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link rounded-3" onclick="showScanner(this)">📷 สแกนเข้าเรียน/งาน</a>
+                            <a href="#" class="nav-link rounded-4 py-2" onclick="showScanner(this)"><i class="fas fa-camera-retro me-2"></i> สแกนเข้าเรียน/งาน</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link rounded-3" onclick="showHistory(this)">📊 สรุปมาเรียน</a>
+                            <a href="#" class="nav-link rounded-4 py-2" onclick="showHistory(this)"><i class="fas fa-chart-line me-2"></i> รายงานสถิติ</a>
                         </li>
                     </ul>
-                    <div class="sidebar-footer border-top pt-3">
-                        <button onclick="logout()" class="btn btn-light text-danger btn-sm rounded-pill w-100 fw-bold">ออกจากระบบ</button>
+                    <div class="sidebar-footer border-top pt-3 px-2">
+                        <button onclick="logout()" class="btn btn-outline-danger btn-sm rounded-pill w-100 fw-bold border-0 bg-light-danger">
+                            <i class="fas fa-sign-out-alt me-1"></i> ออกจากระบบ
+                        </button>
                     </div>
                 </nav>
 
-                <main id="main-content-area" class="flex-grow-1">
+                <main id="main-content-area" class="flex-grow-1 bg-light">
                     <header class="navbar navbar-expand bg-white p-3 shadow-sm border-bottom sticky-top">
                         <div class="container-fluid">
                             <button class="btn btn-sm btn-light me-3 d-md-none" onclick="toggleSidebar()">☰</button>
-                            <span id="header-title" class="fw-bold text-dark">จัดการชั้นเรียน</span>
-                            <div class="ms-auto d-flex align-items-center">
-                                <div id="user-display-name" class="me-3 small text-end"></div>
-                                <img src="https://cdn-icons-png.flaticon.com/512/921/921105.png" class="rounded-circle border" width="35">
+                            <span id="header-title" class="fw-bold text-dark fs-5">หน้าแรก</span>
+                            <div class="ms-auto d-flex align-items-center bg-light px-3 py-1 rounded-pill">
+                                <div id="user-display-name" class="me-3 small text-end fw-bold"></div>
+                                <img src="https://cdn-icons-png.flaticon.com/512/921/921105.png" class="rounded-circle border border-2 border-white shadow-sm" width="35">
                             </div>
                         </div>
                     </header>
-                    <div id="content-area" class="p-4">
+                    <div id="content-area" class="p-4 animate__animated animate__fadeIn">
                         </div>
                 </main>
             </div>
         </div>
     </div>
-
+    
+    <script src="script.js"></script>
 </body>
 </html>
