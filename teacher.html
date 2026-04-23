@@ -257,22 +257,30 @@
         } catch (e) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>'; }
     }
 
-    function editStudent(id, name, photo) {
+// แก้ไขฟังก์ชัน editStudent ให้ปลอดภัยขึ้น
+function editStudent(id, name, photo) {
     document.getElementById('stdId').value = id;
-    document.getElementById('stdId').readOnly = true; // ล็อครหัสไม่ให้แก้ (เพราะเป็น Key หลัก)
+    document.getElementById('stdId').readOnly = true; 
     document.getElementById('stdName').value = name;
-    document.getElementById('previewImg').src = photo || "https://via.placeholder.com/80x100";
+    document.getElementById('previewImg').src = photo || "https://via.placeholder.com/80x100?text=No+Img";
     
-    // เปิด Modal
-    const studentModal = new bootstrap.Modal(document.getElementById('studentModal'));
+    // บันทึกรูปเดิมไว้กรณีไม่ได้อัปโหลดใหม่
+    if(photo && photo.includes('base64,')) {
+        base64Photo = photo.split(',')[1];
+    }
+
+    const modalElem = document.getElementById('studentModal');
+    const studentModal = bootstrap.Modal.getOrCreateInstance(modalElem);
     studentModal.show();
 }
 
-// แก้ไขเพิ่ม: เมื่อปิด Modal ให้ปลดล็อค readOnly ด้วย
+// แก้ไข Event Listener ตอนปิด Modal
 document.getElementById('studentModal').addEventListener('hidden.bs.modal', function () {
     document.getElementById('stdId').readOnly = false;
-    document.getElementById('studentForm').reset();
-    document.getElementById('previewImg').src = "https://via.placeholder.com/80x100";
+    document.getElementById('stdId').value = "";
+    document.getElementById('stdName').value = "";
+    document.getElementById('fileInput').value = ""; // ล้างไฟล์ที่เลือกค้างไว้
+    document.getElementById('previewImg').src = "https://via.placeholder.com/80x100?text=IMG";
     base64Photo = "";
 });
 
