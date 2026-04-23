@@ -152,3 +152,22 @@ function switchScannerMode(mode) {
         settings.style.display = 'none';
     }
 }
+
+// --- วางไว้บรรทัดสุดท้ายของไฟล์ script.js ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("ระบบพร้อมทำงาน...");
+    
+    // 1. ถ้าอยู่ในหน้า Dashboard (ที่มีส่วนแสดงห้องเรียน) ให้โหลดห้องเรียนทันที
+    if (typeof loadRooms === "function") {
+        loadRooms();
+    }
+
+    // 2. ตรวจสอบสถานะการ Login เบื้องต้น (ถ้ามีข้อมูลใน localStorage ให้ข้ามหน้าเลือกบทบาท)
+    const savedUser = localStorage.getItem('userData');
+    if (savedUser) {
+        document.getElementById('role-view').style.setProperty('display', 'none', 'important');
+        document.getElementById('main-view').style.display = 'block';
+        showDashboard(); 
+    }
+});
