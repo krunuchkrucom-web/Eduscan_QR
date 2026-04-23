@@ -1,4 +1,4 @@
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz7N0cfEGWZWVMC4Pjenxne4zHkFarqlj2qDIO6rGtXYi2zSWH-2wAUxmVCtyM4ysrOVA/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzzuu8xj-iuY8z7tEka-iAJU7s2X4zcniHeMXFjPvf_sFnqKgSMaJrySvyFx6lwVexSoA/exec";
 
 let currentRoom = "";
 let userData = JSON.parse(localStorage.getItem('userData')) || { name: 'admin', role: 'admin' };
