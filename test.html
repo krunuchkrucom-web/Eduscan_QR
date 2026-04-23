@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack QR - Classroom Pro Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <style>
+        :root { --primary-color: #4361ee; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f8f9fa; }
+        .role-card { cursor: pointer; transition: 0.3s; border: none; border-radius: 20px; }
+        .role-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; }
+        .scanner-line { height: 3px; width: 100%; background: red; position: absolute; top: 0; animation: scan 2s linear infinite; z-index: 10; }
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+        .nav-link { cursor: pointer; margin-bottom: 5px; }
+        .nav-link.active { background-color: var(--primary-color) !important; color: white !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loader" class="loader-overlay" style="display:none;">
+        <div class="text-center">
+            <div class="spinner-border mb-2"></div>
+            <div>กำลังประมวลผล...</div>
+        </div>
+    </div>
+
+    <div id="role-view" class="container d-flex align-items-center justify-content-center min-vh-100">
+        <div class="text-center w-100" style="max-width: 800px;">
+            <h1 class="fw-bold mb-4">EduTrack <span class="text-primary">QR</span></h1>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-5">
+                    <div class="role-card shadow-sm p-5 bg-white h-100" onclick="selectRole('Student')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3429/3429433.png" width="80" class="mb-3">
+                        <h4 class="fw-bold">สำหรับนักเรียน</h4>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="role-card shadow-sm p-5 bg-white h-100" onclick="selectRole('Teacher')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/906/906175.png" width="80" class="mb-3">
+                        <h4 class="fw-bold">สำหรับผู้สอน</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-view" class="container min-vh-100 d-flex align-items-center justify-content-center" style="display:none !important;">
+        <div class="w-100" style="max-width: 400px;">
+            <div class="text-center mb-4">
+                <button class="btn btn-link btn-sm text-decoration-none" onclick="backToRole()">← กลับ</button>
+                <h2 class="fw-bold">เข้าสู่ระบบ</h2>
+                <span id="role-badge" class="badge rounded-pill bg-primary px-3 py-2 mt-2"></span>
+            </div>
+            <div class="card border-0 shadow-lg p-4 rounded-4">
+                <input type="text" id="username" class="form-control mb-3 rounded-pill" placeholder="ชื่อผู้ใช้">
+                <input type="password" id="password" class="form-control mb-4 rounded-pill" placeholder="รหัสผ่าน">
+                <button onclick="handleLogin()" class="btn btn-primary w-100 rounded-pill py-2 fw-bold">ตกลง</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-view" style="display:none;">
+        <div class="d-flex">
+            <nav class="bg-white p-3 border-end" style="width: 250px; min-height: 100vh;">
+                <h5 class="fw-bold text-primary mb-4">EduTrack PRO</h5>
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item"><a class="nav-link active" onclick="showDashboard(this)">หน้าแรก</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showScanner(this)">สแกน QR</a></li>
+                    <li class="nav-item"><a class="nav-link text-danger mt-5" onclick="location.reload()">ออกจากระบบ</a></li>
+                </ul>
+            </nav>
+            <main class="flex-grow-1">
+                <header class="bg-white p-3 shadow-sm border-bottom">
+                    <h5 id="header-title" class="m-0 fw-bold">จัดการชั้นเรียน</h5>
+                </header>
+                <div id="content-area" class="p-4"></div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let currentRole = "";
+        let html5QrCode = null;
+
+        function selectRole(role) {
+            currentRole = role;
+            document.getElementById('role-view').style.setProperty('display', 'none', 'important');
+            document.getElementById('login-view').style.setProperty('display', 'flex', 'important');
+            document.getElementById('role-badge').innerText = "บทบาท: " + role;
+        }
+
+        function backToRole() {
+            document.getElementById('role-view').style.setProperty('display', 'flex', 'important');
+            document.getElementById('login-view').style.setProperty('display', 'none', 'important');
+        }
+
+        function handleLogin() {
+            const user = document.getElementById('username').value;
+            if(!user) return Swal.fire('กรุณาระบุชื่อผู้ใช้', '', 'warning');
+            
+            document.getElementById('loader').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('login-view').style.setProperty('display', 'none', 'important');
+                document.getElementById('main-view').style.display = 'block';
+                showDashboard();
+            }, 800);
+        }
+
+        function showDashboard(el) {
+            stopScanner();
+            updateMenu(el);
+            document.getElementById('header-title').innerText = "แดชบอร์ด";
+            document.getElementById('content-area').innerHTML = `<h3>ยินดีต้อนรับ</h3><p>เลือกเมนูสแกนเพื่อเริ่มงาน</p>`;
+        }
+
+        function showScanner(el) {
+            updateMenu(el);
+            document.getElementById('header-title').innerText = "ระบบสแกนอัจฉริยะ";
+            document.getElementById('content-area').innerHTML = `
+                <div class="card border-0 shadow-sm mx-auto" style="max-width: 500px; overflow: hidden; position: relative; border-radius: 20px;">
+                    <div id="reader" style="width: 100%; aspect-ratio: 1/1; background: #000;"></div>
+                    <div class="scanner-line"></div>
+                </div>
+                <div class="text-center mt-3"><p class="text-muted">สแกนเพื่อเช็คชื่อหรือส่งงาน</p></div>
+            `;
+
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: 250 },
+                (text) => { 
+                    Swal.fire('สแกนสำเร็จ', 'ข้อมูล: ' + text, 'success');
+                }
+            ).catch(err => console.error("Camera error", err));
+        }
+
+        function stopScanner() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(() => {});
+            }
+        }
+
+        function updateMenu(el) {
+            if(!el) return;
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            el.classList.add('active');
+        }
+    </script>
+</body>
+</html>
