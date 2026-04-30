@@ -3,7 +3,7 @@ let html5QrCode;
 let currentMode = 'attendance';
 let scanHistory = [];
 // ตรวจสอบให้มั่นใจว่า URL นี้เป็นตัวล่าสุดที่ Deploy จาก Google Apps Script
-const scriptURL = 'https://script.google.com/macros/s/AKfycbx-_wojFp6rkj_FRyfWo2K1eQvjyiLKeEQbjDTolRcvPzInyC6q5CmWpE0M2cC-pMPIhQ/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbxcbhoYr1Yjjv4VDbsqx-66dYMmBg9tNn9_vAkXMoptD-nNoSYqvXAqrDyBuoSVBrP5Yg/exec';
 
 // เริ่มทำงานเมื่อโหลดหน้าจอ
 window.onload = () => {
