@@ -12,19 +12,36 @@ window.onload = () => {
 
 // ฟังก์ชันเปิดกล้อง
 function initScanner() {
-    html5QrCode = new Html5Qrcode("reader");
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    // 1. ตรวจสอบว่ามีอุปกรณ์กล้องตัวไหนว่างบ้าง
+    Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length > 0) {
+            // สร้างอินสแตนซ์ scanner
+            html5QrCode = new Html5Qrcode("reader");
+            
+            // เลือกใช้กล้องตัวแรกที่ระบบหาเจอ (สำหรับ Notebook/PC คือกล้องหน้า)
+            const cameraId = devices[0].id; 
+            
+            const config = { 
+                fps: 10, 
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0 
+            };
 
-    html5QrCode.start(
-        { facingMode: "environment" }, 
-        config, 
-        onScanSuccess
-    ).catch(err => {
-        console.error("Scanner Error:", err);
-        const statusLabel = document.getElementById('statusLabel');
-        statusLabel.innerText = "ไม่สามารถเปิดกล้องได้ (โปรดตรวจสอบสิทธิ์การเข้าถึง)";
-        statusLabel.classList.remove('text-blue-900');
-        statusLabel.classList.add('text-red-500');
+            // เริ่มการทำงานด้วย ID ของกล้องที่หาเจอ
+            html5QrCode.start(
+                cameraId, 
+                config, 
+                onScanSuccess
+            ).catch(err => {
+                // กรณีเริ่มกล้องไม่ได้ (เช่น โปรแกรมอื่นจองอยู่)
+                document.getElementById('statusLabel').innerText = "กล้องถูกใช้งานโดยโปรแกรมอื่น";
+                console.error(err);
+            });
+        } else {
+            document.getElementById('statusLabel').innerText = "ไม่พบอุปกรณ์กล้องในเครื่องนี้";
+        }
+    }).catch(err => {
+        document.getElementById('statusLabel').innerText = "เกิดข้อผิดพลาด: " + err;
     });
 }
 
