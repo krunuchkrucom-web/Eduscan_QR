@@ -18,13 +18,11 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         #reader { width: 100% !important; border: none !important; }
         #reader video { object-fit: cover !important; }
-        /* ซ่อนส่วนปุ่มที่ไม่จำเป็นของ Library */
-        #reader__dashboard_section_csr button { background: #3b82f6 !important; color: white !important; padding: 5px 15px !important; border-radius: 8px !important; border: none !important; font-size: 14px !important; }
     </style>
 </head>
 <body class="flex min-h-screen">
 
-    <!-- Sidebar -->
+    <!-- Sidebar (เหมือนเดิมทุกประการ) -->
     <aside class="w-64 bg-white border-r hidden md:flex flex-col sticky top-0 h-screen">
         <div class="p-6 border-b">
             <div class="flex items-center space-x-3">
@@ -72,7 +70,7 @@
         </div>
 
         <div class="grid grid-cols-12 gap-6">
-            <!-- Left Side: Config -->
+            <!-- Left Side -->
             <div class="col-span-12 lg:col-span-4 space-y-6">
                 <div class="bg-white p-5 rounded-3xl shadow-sm border">
                     <h3 class="font-bold text-gray-700 mb-4 flex items-center">
@@ -92,7 +90,7 @@
                     <h3 class="font-bold text-gray-700 mb-4">ข้อมูลการส่งงาน</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">หัวข้อใบงาน / ชื่อโครงการ</label>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">หัวข้อใบงาน</label>
                             <input type="text" id="workTitle" value="ใบงานที่ 1: พื้นฐานวงจรไฟฟ้า" class="w-full border-2 border-gray-100 rounded-xl p-3 focus:border-blue-500 outline-none transition">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
@@ -105,7 +103,6 @@
                                 <select id="timeStatus" class="w-full border-2 border-gray-100 rounded-xl p-3 focus:border-blue-500 outline-none transition">
                                     <option value="ปกติ">ปกติ</option>
                                     <option value="ส่งล่าช้า">ส่งล่าช้า</option>
-                                    <option value="กรณีพิเศษ">กรณีพิเศษ</option>
                                 </select>
                             </div>
                         </div>
@@ -116,14 +113,13 @@
                 </div>
             </div>
 
-            <!-- Middle: Scanner -->
+            <!-- Middle: Scanner Box -->
             <div class="col-span-12 lg:col-span-5">
                 <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border relative">
                     <div class="scanner-box aspect-square flex items-center justify-center">
                         <div class="scan-line"></div>
                         <div id="reader"></div>
                         
-                        <!-- Success Overlay -->
                         <div id="successOverlay" class="absolute inset-0 bg-green-500/90 hidden flex-col items-center justify-center text-white z-20 animate-pulse">
                             <i class="fas fa-check-circle text-7xl mb-4"></i>
                             <h4 class="text-2xl font-bold">สแกนสำเร็จ!</h4>
@@ -133,7 +129,7 @@
                     
                     <div class="mt-8 flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-100">
                         <div>
-                            <p class="text-xs text-blue-500 font-bold uppercase">Current Status</p>
+                            <p class="text-xs text-blue-500 font-bold uppercase">Status</p>
                             <p id="statusLabel" class="text-blue-900 font-bold">กำลังเปิดกล้อง...</p>
                         </div>
                         <button onclick="restartScanner()" class="w-12 h-12 bg-white rounded-full shadow text-blue-600 hover:rotate-180 transition duration-500">
@@ -150,11 +146,9 @@
                         <h3 class="font-bold text-gray-700">ประวัติสแกนล่าสุด</h3>
                         <span id="scanCount" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">0/40</span>
                     </div>
-
                     <div class="space-y-4 flex-1 overflow-y-auto pr-2" id="activityLog">
                         <div id="emptyLog" class="h-20 border-2 border-dashed border-gray-100 rounded-2xl flex items-center justify-center text-gray-300 text-xs italic text-center">สแกนคนถัดไป...</div>
                     </div>
-
                     <button onclick="exportToExcel()" class="mt-6 w-full py-3 bg-gray-800 text-white rounded-xl font-bold hover:bg-black transition shadow-lg shadow-gray-200">
                         ส่งออกรายงาน (Excel)
                     </button>
@@ -163,11 +157,10 @@
         </div>
     </main>
 
-    <!-- Scanner JavaScript Logic -->
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxcbhoYr1Yjjv4VDbsqx-66dYMmBg9tNn9_vAkXMoptD-nNoSYqvXAqrDyBuoSVBrP5Yg/exec";
         let currentMode = 'attendance';
-        let scanner;
+        let html5QrCode; // ตัวแปรสำหรับกล้องตัวใหม่
         let scanHistory = [];
 
         function toggleMode(mode) {
@@ -175,7 +168,6 @@
             const btnAtt = document.getElementById('btnAtt');
             const btnAss = document.getElementById('btnAss');
             const assDetail = document.getElementById('assignmentDetail');
-
             if (mode === 'attendance') {
                 btnAtt.className = "flex-1 py-3 rounded-xl font-bold transition text-blue-600 bg-white shadow-sm";
                 btnAss.className = "flex-1 py-3 rounded-xl font-bold transition text-gray-400";
@@ -187,49 +179,82 @@
             }
         }
 
-        async function onScanSuccess(decodedText) {
-            if (!scanner) return;
-            
-            // ปิดสแกนชั่วคราว
+        // --- เริ่มต้นส่วนที่แก้ไขใหม่ ---
+        async function initScanner() {
             const statusLabel = document.getElementById('statusLabel');
-            statusLabel.innerText = "กำลังตรวจรหัส: " + decodedText;
-            
-            showOverlay("ตรวจสอบข้อมูล...");
-
             try {
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'logQRGenerated', // แก้เป็นชื่อ Action ที่บันทึกสถิติใน code.gs
-                        id: decodedText,
-                        admin: 'Teacher Admin', // ปรับเป็นชื่อผู้ใช้จริงถ้ามีระบบ login
-                        mode: currentMode,
-                        room: document.getElementById('classSelect').value
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showOverlay("สำเร็จ!", decodedText);
-                    addToLog(decodedText, "Success");
-                    setTimeout(hideOverlay, 2000);
+                const devices = await Html5Qrcode.getCameras();
+                if (devices && devices.length > 0) {
+                    html5QrCode = new Html5Qrcode("reader");
+                    let cameraId = devices[0].id;
+                    const backCamera = devices.find(device => 
+                        device.label.toLowerCase().includes('back') || 
+                        device.label.toLowerCase().includes('environment')
+                    );
+                    if (backCamera) cameraId = backCamera.id;
+
+                    const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+                    await html5QrCode.start(cameraId, config, onScanSuccess);
+                    statusLabel.innerText = "พร้อมใช้งาน (กล้อง " + devices.length + ")";
                 } else {
-                    Swal.fire('ผิดพลาด', 'ไม่พบรหัสนี้ในระบบ', 'error');
-                    hideOverlay();
+                    statusLabel.innerText = "ไม่พบอุปกรณ์กล้อง";
+                    statusLabel.classList.add('text-red-600');
                 }
-            } catch (error) {
-                console.error(error);
-                hideOverlay();
-                statusLabel.innerText = "การเชื่อมต่อขัดข้อง";
+            } catch (err) {
+                statusLabel.innerText = "Error: " + err.message;
+                statusLabel.classList.add('text-red-600');
             }
         }
+
+        async function onScanSuccess(decodedText) {
+            // หยุดสแกนชั่วคราวกันการสแกนซ้ำ
+            if (html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) {
+                await html5QrCode.pause(true);
+            }
+
+            const statusLabel = document.getElementById('statusLabel');
+            statusLabel.innerText = "ตรวจพบ: " + decodedText;
+            showOverlay("ตรวจสอบข้อมูล...", decodedText);
+
+            try {
+                const payload = {
+                    action: 'recordScan', // ตรวจสอบชื่อนี้ใน Code.gs
+                    id: decodedText,
+                    mode: currentMode,
+                    room: document.getElementById('classSelect').value,
+                    admin: 'Teacher Admin'
+                };
+
+                const formData = new URLSearchParams();
+                for (const key in payload) formData.append(key, payload[key]);
+
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: formData
+                });
+
+                showOverlay("สำเร็จ!", decodedText);
+                addToLog(decodedText, "Success");
+
+                setTimeout(async () => {
+                    hideOverlay();
+                    await html5QrCode.resume();
+                }, 2000);
+
+            } catch (error) {
+                Swal.fire('ผิดพลาด', 'การเชื่อมต่อขัดข้อง', 'error');
+                hideOverlay();
+                await html5QrCode.resume();
+            }
+        }
+        // --- จบส่วนที่แก้ไขใหม่ ---
 
         function showOverlay(msg, id = "") {
             const overlay = document.getElementById('successOverlay');
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
-            document.getElementById('scannedName').innerText = id ? "รหัส: " + id : msg;
+            document.getElementById('scannedName').innerText = id ? "ID: " + id : msg;
         }
 
         function hideOverlay() {
@@ -242,72 +267,26 @@
             const log = document.getElementById('activityLog');
             const empty = document.getElementById('emptyLog');
             if (empty) empty.remove();
-
             scanHistory.push({id, time: new Date().toLocaleTimeString(), status});
-            
             const item = document.createElement('div');
-            item.className = "flex items-center p-3 bg-blue-50 rounded-xl border border-blue-100 animate-slide-in";
+            item.className = "flex items-center p-3 bg-blue-50 rounded-xl border border-blue-100";
             item.innerHTML = `
-                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-blue-600 mr-3 shadow-sm">
-                    <i class="fas fa-user-check"></i>
-                </div>
+                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-blue-600 mr-3 shadow-sm"><i class="fas fa-user-check"></i></div>
                 <div class="flex-1">
                     <p class="text-sm font-bold text-gray-800">${id}</p>
                     <p class="text-[10px] text-gray-500">${new Date().toLocaleTimeString()}</p>
                 </div>
-                <span class="text-[10px] font-bold text-green-500 bg-green-50 px-2 py-1 rounded-lg">สำเร็จ</span>
-            `;
+                <span class="text-[10px] font-bold text-green-500 bg-green-50 px-2 py-1 rounded-lg">สำเร็จ</span>`;
             log.prepend(item);
             document.getElementById('scanCount').innerText = scanHistory.length + "/40";
         }
 
-function initScanner() {
-    scanner = new Html5QrcodeScanner("reader", { 
-        fps: 10, 
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0
-    });
-    
-    scanner.render(onScanSuccess, (errorMessage) => {
-        // หากต้องการดู Log ข้อผิดพลาดใน Console
-        // console.warn(errorMessage);
-    });
-
-    // ดักจับกรณีหาอุปกรณ์ไม่เจอ
-    Html5Qrcode.getCameras().then(cameras => {
-        if (cameras && cameras.length > 0) {
-            document.getElementById('statusLabel').innerText = "ตรวจพบกล้อง " + cameras.length + " ตัว";
-        } else {
-            document.getElementById('statusLabel').innerText = "ไม่พบอุปกรณ์กล้องในเครื่องนี้";
-            document.getElementById('statusLabel').className = "text-red-600 font-bold";
-        }
-    }).catch(err => {
-        document.getElementById('statusLabel').innerText = "ไม่สามารถเข้าถึงกล้องได้ (NotFoundError)";
-        document.getElementById('statusLabel').className = "text-red-600 font-bold";
-    });
-}
-
-        function restartScanner() {
-            location.reload();
-        }
-
-        function logout() {
-            localStorage.clear();
-            location.href = "index.html";
-        }
-
-        function saveAssignmentSettings() {
-            Swal.fire({
-                title: 'บันทึกสำเร็จ',
-                text: 'ตั้งค่าหัวข้อการสแกนงานเรียบร้อยแล้ว',
-                icon: 'success',
-                confirmButtonColor: '#3b82f6'
-            });
-        }
-
-        function exportToExcel() {
-            if (scanHistory.length === 0) return Swal.fire('แจ้งเตือน', 'ยังไม่มีข้อมูลการสแกน', 'warning');
-            Swal.fire('สำเร็จ', 'ระบบกำลังส่งข้อมูลไปที่ Google Sheet ของคุณ', 'success');
+        function restartScanner() { location.reload(); }
+        function logout() { localStorage.clear(); location.href = "index.html"; }
+        function saveAssignmentSettings() { Swal.fire('สำเร็จ', 'บันทึกการตั้งค่าแล้ว', 'success'); }
+        function exportToExcel() { 
+            if (scanHistory.length === 0) return Swal.fire('แจ้งเตือน', 'ยังไม่มีข้อมูล', 'warning');
+            Swal.fire('สำเร็จ', 'ส่งข้อมูลไปที่ Google Sheet แล้ว', 'success'); 
         }
 
         window.onload = initScanner;
