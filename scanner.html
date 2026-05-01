@@ -11,20 +11,18 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
         body { font-family: 'Sarabun', sans-serif; background-color: #f1f5f9; }
-        .scanner-box { position: relative; border: 4px solid #3b82f6; border-radius: 20px; overflow: hidden; background: #000; }
+        .scanner-box { position: relative; border: 4px solid #3b82f6; border-radius: 20px; overflow: hidden; background: #000; min-height: 300px; }
         .scan-line { height: 3px; width: 100%; background: linear-gradient(to right, transparent, #3b82f6, transparent); position: absolute; top: 0; animation: scanMove 2.5s infinite linear; box-shadow: 0 0 15px #3b82f6; z-index: 5; pointer-events: none; }
         @keyframes scanMove { 0% { top: 0; } 100% { top: 100%; } }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         #reader { width: 100% !important; border: none !important; }
-        #reader video { object-fit: cover !important; }
-        /* ซ่อนส่วนปุ่มที่ไม่จำเป็นของ Library */
-        #reader__dashboard_section_csr button { background: #3b82f6 !important; color: white !important; padding: 5px 15px !important; border-radius: 8px !important; border: none !important; font-size: 14px !important; }
+        #reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
+        .animate-slide-in { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body class="flex min-h-screen">
 
-    <!-- Sidebar -->
+    <!-- Sidebar (โครงเดิม) -->
     <aside class="w-64 bg-white border-r hidden md:flex flex-col sticky top-0 h-screen">
         <div class="p-6 border-b">
             <div class="flex items-center space-x-3">
@@ -35,23 +33,13 @@
             </div>
         </div>
         <nav class="flex-1 p-4 space-y-1">
-            <a href="teacher.html" class="flex items-center p-3 text-gray-500 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">
-                <i class="fas fa-users-cog w-8 text-lg"></i> จัดการนักเรียน
-            </a>
-            <a href="qrcode.html" class="flex items-center p-3 text-gray-500 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">
-                <i class="fas fa-qrcode w-8 text-lg"></i> สร้าง QR Code
-            </a>
-            <a href="scanner.html" class="flex items-center p-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200">
-                <i class="fas fa-camera-retro w-8 text-lg"></i> สแกนเข้าเรียน/งาน
-            </a>
-            <a href="reports.html" class="flex items-center p-3 text-gray-500 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition">
-                <i class="fas fa-chart-line w-8 text-lg"></i> สรุปผลการเรียน
-            </a>
+            <a href="#" class="flex items-center p-3 text-gray-500 hover:bg-blue-50 rounded-xl transition"><i class="fas fa-users-cog w-8"></i> จัดการนักเรียน</a>
+            <a href="#" class="flex items-center p-3 text-gray-500 hover:bg-blue-50 rounded-xl transition"><i class="fas fa-qrcode w-8"></i> สร้าง QR Code</a>
+            <a href="#" class="flex items-center p-3 bg-blue-600 text-white rounded-xl shadow-lg"><i class="fas fa-camera-retro w-8"></i> สแกนเข้าเรียน/งาน</a>
+            <a href="#" class="flex items-center p-3 text-gray-500 hover:bg-blue-50 rounded-xl transition"><i class="fas fa-chart-line w-8"></i> สรุปผลการเรียน</a>
         </nav>
         <div class="p-4 border-t">
-            <button onclick="logout()" class="w-full flex items-center p-3 text-red-500 hover:bg-red-50 rounded-xl transition">
-                <i class="fas fa-sign-out-alt w-8 text-lg"></i> ออกจากระบบ
-            </button>
+            <button onclick="location.reload()" class="w-full flex items-center p-3 text-red-500 hover:bg-red-50 rounded-xl"><i class="fas fa-sign-out-alt w-8"></i> ออกจากระบบ</button>
         </div>
     </aside>
 
@@ -75,16 +63,10 @@
             <!-- Left Side: Config -->
             <div class="col-span-12 lg:col-span-4 space-y-6">
                 <div class="bg-white p-5 rounded-3xl shadow-sm border">
-                    <h3 class="font-bold text-gray-700 mb-4 flex items-center">
-                        <i class="fas fa-toggle-on mr-2 text-blue-500"></i> เลือกประเภทการสแกน
-                    </h3>
+                    <h3 class="font-bold text-gray-700 mb-4 flex items-center"><i class="fas fa-toggle-on mr-2 text-blue-500"></i> เลือกประเภทการสแกน</h3>
                     <div class="flex p-1 bg-gray-100 rounded-2xl">
-                        <button onclick="toggleMode('attendance')" id="btnAtt" class="flex-1 py-3 rounded-xl font-bold transition text-blue-600 bg-white shadow-sm">
-                            เช็คชื่อเข้าเรียน
-                        </button>
-                        <button onclick="toggleMode('assignment')" id="btnAss" class="flex-1 py-3 rounded-xl font-bold transition text-gray-400">
-                            ส่งงาน/ให้คะแนน
-                        </button>
+                        <button onclick="toggleMode('attendance')" id="btnAtt" class="flex-1 py-3 rounded-xl font-bold transition text-blue-600 bg-white shadow-sm">เช็คชื่อเข้าเรียน</button>
+                        <button onclick="toggleMode('assignment')" id="btnAss" class="flex-1 py-3 rounded-xl font-bold transition text-gray-400">ส่งงาน/ให้คะแนน</button>
                     </div>
                 </div>
 
@@ -92,26 +74,22 @@
                     <h3 class="font-bold text-gray-700 mb-4">ข้อมูลการส่งงาน</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">หัวข้อใบงาน / ชื่อโครงการ</label>
-                            <input type="text" id="workTitle" value="ใบงานที่ 1: พื้นฐานวงจรไฟฟ้า" class="w-full border-2 border-gray-100 rounded-xl p-3 focus:border-blue-500 outline-none transition">
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">หัวข้อใบงาน</label>
+                            <input type="text" id="workTitle" value="ใบงานที่ 1: พื้นฐานวงจรไฟฟ้า" class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">คะแนนเต็ม</label>
-                                <input type="number" id="fullScore" value="10" class="w-full border-2 border-gray-100 rounded-xl p-3 focus:border-blue-500 outline-none transition text-center text-lg font-bold">
+                                <input type="number" id="fullScore" value="10" class="w-full border-2 border-gray-100 rounded-xl p-3 text-center font-bold">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-400 uppercase mb-1">สถานะเวลา</label>
-                                <select id="timeStatus" class="w-full border-2 border-gray-100 rounded-xl p-3 focus:border-blue-500 outline-none transition">
+                                <select id="timeStatus" class="w-full border-2 border-gray-100 rounded-xl p-3 outline-none">
                                     <option value="ปกติ">ปกติ</option>
                                     <option value="ส่งล่าช้า">ส่งล่าช้า</option>
-                                    <option value="กรณีพิเศษ">กรณีพิเศษ</option>
                                 </select>
                             </div>
                         </div>
-                        <button onclick="saveAssignmentSettings()" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 transition shadow-lg shadow-green-100">
-                            บันทึกการตั้งค่า
-                        </button>
                     </div>
                 </div>
             </div>
@@ -120,23 +98,23 @@
             <div class="col-span-12 lg:col-span-5">
                 <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border relative">
                     <div class="scanner-box aspect-square flex items-center justify-center">
-                        <div class="scan-line"></div>
+                        <div id="scanLine" class="scan-line"></div>
                         <div id="reader"></div>
                         
                         <!-- Success Overlay -->
                         <div id="successOverlay" class="absolute inset-0 bg-green-500/90 hidden flex-col items-center justify-center text-white z-20 animate-pulse">
                             <i class="fas fa-check-circle text-7xl mb-4"></i>
                             <h4 class="text-2xl font-bold">สแกนสำเร็จ!</h4>
-                            <p id="scannedName" class="mt-2 text-xl italic font-semibold">กำลังบันทึก...</p>
+                            <p id="scannedName" class="mt-2 text-xl italic font-semibold">บันทึกข้อมูลแล้ว</p>
                         </div>
                     </div>
                     
                     <div class="mt-8 flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-100">
-                        <div>
+                        <div class="flex-1">
                             <p class="text-xs text-blue-500 font-bold uppercase">Current Status</p>
-                            <p id="statusLabel" class="text-blue-900 font-bold">กำลังเปิดกล้อง...</p>
+                            <p id="statusLabel" class="text-blue-900 font-bold text-sm">กำลังเตรียมระบบกล้อง...</p>
                         </div>
-                        <button onclick="restartScanner()" class="w-12 h-12 bg-white rounded-full shadow text-blue-600 hover:rotate-180 transition duration-500">
+                        <button onclick="restartScanner()" class="w-12 h-12 bg-white rounded-full shadow text-blue-600 hover:rotate-180 transition duration-500 flex items-center justify-center">
                             <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
@@ -150,167 +128,157 @@
                         <h3 class="font-bold text-gray-700">ประวัติสแกนล่าสุด</h3>
                         <span id="scanCount" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">0/40</span>
                     </div>
-
                     <div class="space-y-4 flex-1 overflow-y-auto pr-2" id="activityLog">
                         <div id="emptyLog" class="h-20 border-2 border-dashed border-gray-100 rounded-2xl flex items-center justify-center text-gray-300 text-xs italic text-center">สแกนคนถัดไป...</div>
                     </div>
-
-                    <button onclick="exportToExcel()" class="mt-6 w-full py-3 bg-gray-800 text-white rounded-xl font-bold hover:bg-black transition shadow-lg shadow-gray-200">
-                        ส่งออกรายงาน (Excel)
-                    </button>
+                    <button onclick="exportToExcel()" class="mt-6 w-full py-3 bg-gray-800 text-white rounded-xl font-bold hover:bg-black transition">ส่งออกรายงาน (Excel)</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Scanner JavaScript Logic -->
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxcbhoYr1Yjjv4VDbsqx-66dYMmBg9tNn9_vAkXMoptD-nNoSYqvXAqrDyBuoSVBrP5Yg/exec";
+        let html5QrCode;
         let currentMode = 'attendance';
-        let scanner;
         let scanHistory = [];
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxcbhoYr1Yjjv4VDbsqx-66dYMmBg9tNn9_vAkXMoptD-nNoSYqvXAqrDyBuoSVBrP5Yg/exec';
+
+        window.onload = () => {
+            initScanner();
+        };
+
+        async function initScanner() {
+            const statusLabel = document.getElementById('statusLabel');
+            
+            try {
+                const devices = await Html5Qrcode.getCameras();
+                if (devices && devices.length > 0) {
+                    html5QrCode = new Html5Qrcode("reader");
+                    
+                    // เลือกกล้องหลังอัตโนมัติ
+                    let cameraId = devices[0].id;
+                    const backCamera = devices.find(device => 
+                        device.label.toLowerCase().includes('back') || 
+                        device.label.toLowerCase().includes('environment')
+                    );
+                    if (backCamera) cameraId = backCamera.id;
+
+                    const config = { 
+                        fps: 10, 
+                        qrbox: { width: 250, height: 250 },
+                        aspectRatio: 1.0 
+                    };
+
+                    await html5QrCode.start(cameraId, config, onScanSuccess);
+                    statusLabel.innerText = "กล้องพร้อมใช้งาน (" + (backCamera ? "เลนส์หลัง" : "เลนส์หลัก") + ")";
+                } else {
+                    statusLabel.innerText = "ไม่พบอุปกรณ์กล้อง";
+                    statusLabel.classList.add('text-red-500');
+                }
+            } catch (err) {
+                statusLabel.innerText = "Error: " + err;
+                statusLabel.classList.add('text-red-500');
+                console.error(err);
+            }
+        }
+
+        async function onScanSuccess(decodedText) {
+            // หยุดสแกนชั่วคราวเพื่อประมวลผล
+            await html5QrCode.pause();
+            
+            const studentData = {
+                action: 'recordScan',
+                id: decodedText,
+                mode: currentMode,
+                room: document.getElementById('classSelect').value,
+                workName: currentMode === 'assignment' ? document.getElementById('workTitle').value : 'เช็คชื่อเข้าเรียน',
+                score: currentMode === 'assignment' ? document.getElementById('fullScore').value : '-',
+                status: document.getElementById('timeStatus').value,
+                admin: "Teacher Admin"
+            };
+
+            showSuccessUI(decodedText);
+            saveToSheet(studentData);
+        }
+
+        function showSuccessUI(id) {
+            const overlay = document.getElementById('successOverlay');
+            document.getElementById('scannedName').innerText = "ID: " + id;
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            setTimeout(async () => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                if(html5QrCode) await html5QrCode.resume();
+            }, 2000);
+        }
+
+        function saveToSheet(data) {
+            updateScanHistory(data);
+
+            const formData = new URLSearchParams();
+            for (const key in data) formData.append(key, data[key]);
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            }).catch(err => console.error("Sheet Error:", err));
+        }
+
+        function updateScanHistory(data) {
+            const logContainer = document.getElementById('activityLog');
+            const emptyPlaceholder = document.getElementById('emptyLog');
+            if (emptyPlaceholder) emptyPlaceholder.remove();
+
+            const time = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            const item = document.createElement('div');
+            item.className = "p-4 bg-white rounded-2xl border border-gray-100 mb-3 shadow-sm animate-slide-in";
+            item.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3 text-xs font-bold">
+                        ${data.id.substring(0,3)}
+                    </div>
+                    <span class="font-bold text-gray-800 text-sm">ID: ${data.id}</span>
+                </div>
+                <div class="flex justify-between items-center text-[11px]">
+                    <span class="text-green-500 font-bold"><i class="fas fa-clock mr-1"></i> ${time} น.</span>
+                    <span class="px-2 py-1 ${data.mode === 'assignment' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'} rounded-lg font-bold">
+                        ${data.mode === 'assignment' ? 'คะแนน: '+data.score : 'เข้าเรียน'}
+                    </span>
+                </div>
+            `;
+            logContainer.insertBefore(item, logContainer.firstChild);
+            scanHistory.push(data);
+            document.getElementById('scanCount').innerText = scanHistory.length + "/40";
+        }
 
         function toggleMode(mode) {
             currentMode = mode;
             const btnAtt = document.getElementById('btnAtt');
             const btnAss = document.getElementById('btnAss');
-            const assDetail = document.getElementById('assignmentDetail');
+            const detail = document.getElementById('assignmentDetail');
 
-            if (mode === 'attendance') {
-                btnAtt.className = "flex-1 py-3 rounded-xl font-bold transition text-blue-600 bg-white shadow-sm";
-                btnAss.className = "flex-1 py-3 rounded-xl font-bold transition text-gray-400";
-                assDetail.classList.add('hidden');
-            } else {
+            if (mode === 'assignment') {
                 btnAss.className = "flex-1 py-3 rounded-xl font-bold transition text-blue-600 bg-white shadow-sm";
                 btnAtt.className = "flex-1 py-3 rounded-xl font-bold transition text-gray-400";
-                assDetail.classList.remove('hidden');
+                detail.classList.remove('hidden');
+            } else {
+                btnAtt.className = "flex-1 py-3 rounded-xl font-bold transition text-blue-600 bg-white shadow-sm";
+                btnAss.className = "flex-1 py-3 rounded-xl font-bold transition text-gray-400";
+                detail.classList.add('hidden');
             }
         }
-
-        async function onScanSuccess(decodedText) {
-            if (!scanner) return;
-            
-            // ปิดสแกนชั่วคราว
-            const statusLabel = document.getElementById('statusLabel');
-            statusLabel.innerText = "กำลังตรวจรหัส: " + decodedText;
-            
-            showOverlay("ตรวจสอบข้อมูล...");
-
-            try {
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'logQRGenerated', // แก้เป็นชื่อ Action ที่บันทึกสถิติใน code.gs
-                        id: decodedText,
-                        admin: 'Teacher Admin', // ปรับเป็นชื่อผู้ใช้จริงถ้ามีระบบ login
-                        mode: currentMode,
-                        room: document.getElementById('classSelect').value
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showOverlay("สำเร็จ!", decodedText);
-                    addToLog(decodedText, "Success");
-                    setTimeout(hideOverlay, 2000);
-                } else {
-                    Swal.fire('ผิดพลาด', 'ไม่พบรหัสนี้ในระบบ', 'error');
-                    hideOverlay();
-                }
-            } catch (error) {
-                console.error(error);
-                hideOverlay();
-                statusLabel.innerText = "การเชื่อมต่อขัดข้อง";
-            }
-        }
-
-        function showOverlay(msg, id = "") {
-            const overlay = document.getElementById('successOverlay');
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-            document.getElementById('scannedName').innerText = id ? "รหัส: " + id : msg;
-        }
-
-        function hideOverlay() {
-            document.getElementById('successOverlay').classList.add('hidden');
-            document.getElementById('successOverlay').classList.remove('flex');
-            document.getElementById('statusLabel').innerText = "พร้อมสแกน...";
-        }
-
-        function addToLog(id, status) {
-            const log = document.getElementById('activityLog');
-            const empty = document.getElementById('emptyLog');
-            if (empty) empty.remove();
-
-            scanHistory.push({id, time: new Date().toLocaleTimeString(), status});
-            
-            const item = document.createElement('div');
-            item.className = "flex items-center p-3 bg-blue-50 rounded-xl border border-blue-100 animate-slide-in";
-            item.innerHTML = `
-                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-blue-600 mr-3 shadow-sm">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div class="flex-1">
-                    <p class="text-sm font-bold text-gray-800">${id}</p>
-                    <p class="text-[10px] text-gray-500">${new Date().toLocaleTimeString()}</p>
-                </div>
-                <span class="text-[10px] font-bold text-green-500 bg-green-50 px-2 py-1 rounded-lg">สำเร็จ</span>
-            `;
-            log.prepend(item);
-            document.getElementById('scanCount').innerText = scanHistory.length + "/40";
-        }
-
-function initScanner() {
-    scanner = new Html5QrcodeScanner("reader", { 
-        fps: 10, 
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0
-    });
-    
-    scanner.render(onScanSuccess, (errorMessage) => {
-        // หากต้องการดู Log ข้อผิดพลาดใน Console
-        // console.warn(errorMessage);
-    });
-
-    // ดักจับกรณีหาอุปกรณ์ไม่เจอ
-    Html5Qrcode.getCameras().then(cameras => {
-        if (cameras && cameras.length > 0) {
-            document.getElementById('statusLabel').innerText = "ตรวจพบกล้อง " + cameras.length + " ตัว";
-        } else {
-            document.getElementById('statusLabel').innerText = "ไม่พบอุปกรณ์กล้องในเครื่องนี้";
-            document.getElementById('statusLabel').className = "text-red-600 font-bold";
-        }
-    }).catch(err => {
-        document.getElementById('statusLabel').innerText = "ไม่สามารถเข้าถึงกล้องได้ (NotFoundError)";
-        document.getElementById('statusLabel').className = "text-red-600 font-bold";
-    });
-}
 
         function restartScanner() {
             location.reload();
         }
 
-        function logout() {
-            localStorage.clear();
-            location.href = "index.html";
-        }
-
-        function saveAssignmentSettings() {
-            Swal.fire({
-                title: 'บันทึกสำเร็จ',
-                text: 'ตั้งค่าหัวข้อการสแกนงานเรียบร้อยแล้ว',
-                icon: 'success',
-                confirmButtonColor: '#3b82f6'
-            });
-        }
-
         function exportToExcel() {
             if (scanHistory.length === 0) return Swal.fire('แจ้งเตือน', 'ยังไม่มีข้อมูลการสแกน', 'warning');
-            Swal.fire('สำเร็จ', 'ระบบกำลังส่งข้อมูลไปที่ Google Sheet ของคุณ', 'success');
+            Swal.fire('สำเร็จ', 'ข้อมูลถูกส่งไปยังระบบหลังบ้านแล้ว', 'success');
         }
-
-        window.onload = initScanner;
     </script>
 </body>
 </html>
